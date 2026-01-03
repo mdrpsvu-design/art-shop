@@ -1,14 +1,16 @@
 const VK_ID = "487502463"; 
 let currentCategory = 'all';
 let viewMode = 'feed';
-let itemsData = []; // Храним загруженные данные
+let itemsData = []; 
 
 document.addEventListener("DOMContentLoaded", () => {
     loadGallery();
     
-    // Поиск
+    // Поиск с задержкой (чтобы не дергалось)
+    let debounce;
     document.getElementById('search-input').addEventListener('input', (e) => {
-        loadGallery(e.target.value);
+        clearTimeout(debounce);
+        debounce = setTimeout(() => loadGallery(e.target.value), 500);
     });
 
     // Категории
@@ -21,41 +23,45 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Переключение вида
     document.getElementById('view-toggle-btn').addEventListener('click', toggleView);
 });
 
 function scrollToGallery() {
-    const el = document.getElementById('gallery-container');
-    el.scrollIntoView({ behavior: 'smooth' });
+    // Скроллим к первому элементу после Hero
+    const firstItem = document.querySelector('.slide-section');
+    if(firstItem) firstItem.scrollIntoView({ behavior: 'smooth' });
 }
 
 function toggleView() {
-    const container = document.getElementById('gallery-container');
+    viewMode = (viewMode === 'feed') ? 'grid' : 'feed';
     const btn = document.getElementById('view-toggle-btn');
-    if (viewMode === 'feed') {
-        viewMode = 'grid';
-        container.className = 'grid-mode';
+    
+    if (viewMode === 'grid') {
         btn.innerHTML = '<i class="fas fa-stream"></i>';
+        document.body.classList.remove('snap-active'); // Выключаем магнит
     } else {
-        viewMode = 'feed';
-        container.className = 'feed-mode';
         btn.innerHTML = '<i class="fas fa-th-large"></i>';
+        document.body.classList.add('snap-active'); // Включаем магнит
     }
-    renderItems(); // Перерисовка без перезагрузки
+    renderItems(); 
 }
 
 async function loadGallery(search = '') {
     const hero = document.getElementById('hero-wrapper');
     const container = document.getElementById('dynamic-content');
     
-    // Скрываем Hero, если ищем или фильтруем
+    // Логика отображения Hero секции
     if (search || currentCategory !== 'all') {
         hero.style.display = 'none';
-        container.style.paddingTop = '120px'; // Отступ для фиксированной шапки
+        // Если поиск, выключаем магнит, чтобы удобно листать результаты
+        document.body.classList.remove('snap-active');
     } else {
-        hero.style.display = 'flex';
-        container.style.paddingTop = '0';
+        if(viewMode === 'feed') {
+             hero.style.display = 'flex';
+             document.body.classList.add('snap-active'); // Включаем магнит на главной
+        } else {
+             hero.style.display = 'none';
+        }
     }
 
     let url = `/api/items?`;
@@ -66,9 +72,7 @@ async function loadGallery(search = '') {
         const res = await fetch(url);
         itemsData = await res.json();
         renderItems();
-    } catch (e) {
-        console.error(e);
-    }
+    } catch (e) { console.error(e); }
 }
 
 function renderItems() {
@@ -83,7 +87,7 @@ function renderItems() {
     itemsData.forEach(item => {
         const el = document.createElement('div');
         if (viewMode === 'feed') {
-            el.className = 'slide-section';
+            el.className = 'slide-section'; // Секция для магнитного скролла
             el.innerHTML = getFeedHTML(item);
         } else {
             el.className = 'grid-item';
@@ -94,14 +98,13 @@ function renderItems() {
 }
 
 function getFeedHTML(item) {
-    // Если картинок нет, ставим заглушку. Если есть, берем первую.
-    const images = item.images.length ? item.images : ['/static/placeholder.png'];
-    // Сохраняем массив картинок в data-атрибут (или в JS переменную, но так проще)
-    const imagesJson = JSON.stringify(images).replace(/"/g, '&quot;');
+    const images = item.images.length ? item.images : ['/static/favicon.png'];
+    // Сохраняем ссылки для переключения
+    const imagesAttr = JSON.stringify(images).replace(/"/g, '&quot;');
     
     const arrowBtns = images.length > 1 ? `
-        <button class="slider-btn prev-btn" onclick="switchImage(this, -1, ${imagesJson})">&#10094;</button>
-        <button class="slider-btn next-btn" onclick="switchImage(this, 1, ${imagesJson})">&#10095;</button>
+        <button class="slider-btn prev-btn" onclick="switchImage(this, -1, ${imagesAttr})">&#10094;</button>
+        <button class="slider-btn next-btn" onclick="switchImage(this, 1, ${imagesAttr})">&#10095;</button>
     ` : '';
 
     return `
@@ -113,11 +116,12 @@ function getFeedHTML(item) {
             <div class="art-info">
                 <div>
                     <h2 class="art-title">${item.title}</h2>
-                    <span style="color:var(--accent); font-weight:bold;">${item.price} ₽</span>
+                    <span class="art-price">${item.price} ₽</span>
                 </div>
                 <div class="btn-group">
-                    <button class="action-btn desc-btn" onclick="openDesc('${item.title}', \`${item.description}\`)">Описание</button>
-                    <button class="action-btn" onclick="openVk('${item.title}', ${item.price})">Купить</button>
+                    <!-- Передаем ID, а не текст описания, чтобы не ломалось -->
+                    <button class="action-btn desc-btn" onclick="openDesc(${item.id})">Описание</button>
+                    <button class="action-btn buy-btn" onclick="openVk(${item.id})">Купить</button>
                 </div>
             </div>
         </div>
@@ -127,41 +131,60 @@ function getFeedHTML(item) {
 function getGridHTML(item) {
     const img = item.images.length ? item.images[0] : '';
     return `
-        <img src="${img}" class="grid-img">
+        <img src="${img}" class="grid-img" loading="lazy">
         <div class="grid-details">
             <b>${item.title}</b>
             <p>${item.price} ₽</p>
-            <button class="action-btn" style="width:100%" onclick="openVk('${item.title}', ${item.price})">Купить</button>
+            <button class="action-btn buy-btn" style="width:100%" onclick="openVk(${item.id})">Купить</button>
         </div>
     `;
 }
 
-// --- Слайдер картинок ---
+// --- Анимация переключения фото ---
 window.switchImage = function(btn, dir, images) {
     const wrapper = btn.parentElement;
     const imgTag = wrapper.querySelector('.art-img');
-    let currentIdx = parseInt(imgTag.dataset.idx);
     
-    let newIdx = currentIdx + dir;
-    if (newIdx < 0) newIdx = images.length - 1;
-    if (newIdx >= images.length) newIdx = 0;
-    
-    imgTag.src = images[newIdx];
-    imgTag.dataset.idx = newIdx;
+    // 1. Добавляем класс затухания
+    imgTag.classList.add('fade-out');
+
+    // 2. Ждем 200мс, меняем картинку, убираем класс
+    setTimeout(() => {
+        let currentIdx = parseInt(imgTag.dataset.idx);
+        let newIdx = currentIdx + dir;
+        
+        if (newIdx < 0) newIdx = images.length - 1;
+        if (newIdx >= images.length) newIdx = 0;
+        
+        imgTag.src = images[newIdx];
+        imgTag.dataset.idx = newIdx;
+        
+        // Когда картинка загрузится (из кэша быстро), убираем прозрачность
+        imgTag.onload = () => imgTag.classList.remove('fade-out');
+        // На случай если она уже в кэше
+        setTimeout(() => imgTag.classList.remove('fade-out'), 50);
+        
+    }, 200); // Время должно совпадать с CSS transition
 };
 
 // --- Модальные окна ---
-window.openVk = function(title, price) {
-    const text = `Здравствуйте! Хочу купить "${title}" за ${price}р.`;
+window.openVk = function(id) {
+    const item = itemsData.find(i => i.id === id);
+    if(!item) return;
+
+    const text = `Здравствуйте! Хочу купить "${item.title}" за ${item.price}р.`;
     navigator.clipboard.writeText(text);
     const url = `https://vk.com/write${VK_ID}?message=${encodeURIComponent(text)}`;
     document.getElementById('vk-go-btn').onclick = () => window.open(url, '_blank');
     document.getElementById('vk-modal').style.display = 'block';
 };
 
-window.openDesc = function(title, desc) {
-    document.getElementById('desc-title').innerText = title;
-    document.getElementById('desc-text').innerText = desc;
+window.openDesc = function(id) {
+    const item = itemsData.find(i => i.id === id);
+    if(!item) return;
+
+    document.getElementById('desc-title').innerText = item.title;
+    document.getElementById('desc-text').innerText = item.description;
     document.getElementById('desc-modal').style.display = 'block';
 };
 

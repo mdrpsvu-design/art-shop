@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/favicon.png">
     <title>Handmade Soul | Ольга Мартьянова</title>
-    <link href="https://fonts.googleapis.com/css2?family=Alice&family=Marck+Script&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alice&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="snap-active"> <!-- По умолчанию включен магнит -->
 
     <header class="top-bar">
-        <div class="logo">Handmade <span style="font-family: 'Marck Script'; color: var(--accent);">Soul</span></div>
+        <div class="logo" style="font-family: 'Alice'; font-size:1.3rem;">Handmade Soul</div>
         <div class="controls">
             <div class="search-box">
-                <input type="text" id="search-input" placeholder="Поиск...">
-                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Поиск">
             </div>
             <button class="view-toggle" id="view-toggle-btn"><i class="fas fa-th-large"></i></button>
         </div>
@@ -32,49 +31,43 @@
         <button class="cat-btn" data-cat="gifts">Подарки</button>
     </nav>
 
-    <!-- Секция приветствия (Теперь вне контейнера скролла, чтобы контролировать видимость) -->
+    <!-- Секция приветствия -->
     <div id="hero-wrapper">
-        <section class="hero-section">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>Тепло рук,<br>воплощенное в деталях</h1>
-                    <p>Авторские работы: традиции и уют для вашего дома.</p>
-                    <div class="scroll-down" onclick="scrollToGallery()">
-                        <span>Смотреть</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
+        <section class="hero-content">
+            <div class="hero-text">
+                <h1>Тепло рук,<br>в каждой детали</h1>
+                <p>Авторские работы Ольги Мартьяновой.</p>
+                <div class="scroll-down" onclick="scrollToGallery()">
+                    В коллекцию <br> <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="hero-image">
-                    <img src="/static/mom.jpg" alt="Мастер">
-                </div>
+            </div>
+            <div class="hero-image">
+                <img src="/static/mom.jpg" alt="Мастер">
             </div>
         </section>
     </div>
 
-    <!-- Основной контейнер товаров -->
-    <main id="gallery-container" class="feed-mode">
+    <!-- Контейнер товаров -->
+    <main id="gallery-container">
         <div id="dynamic-content"></div>
     </main>
 
-    <!-- Модалка покупки ВК -->
+    <!-- Модалки -->
     <div id="vk-modal" class="modal">
         <div class="modal-box">
             <span class="close-modal" onclick="closeModal('vk-modal')">&times;</span>
             <i class="fab fa-vk vk-icon"></i>
             <h3>Заказать</h3>
-            <p>Текст заказа скопирован.</p>
-            <button id="vk-go-btn" class="action-btn">Перейти в ВК</button>
+            <p>Текст скопирован.</p>
+            <button id="vk-go-btn" class="action-btn buy-btn" style="width:100%">Перейти в ВК</button>
         </div>
     </div>
 
-    <!-- Модалка Описания (Новое) -->
     <div id="desc-modal" class="modal">
         <div class="modal-box large-box">
             <span class="close-modal" onclick="closeModal('desc-modal')">&times;</span>
-            <h3 id="desc-title">Название</h3>
-            <div class="desc-text" id="desc-text">
-                Тут будет описание...
-            </div>
+            <h3 id="desc-title" style="margin-top:0; font-family:'Alice'"></h3>
+            <div class="desc-text" id="desc-text"></div>
         </div>
     </div>
 
