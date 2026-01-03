@@ -9,15 +9,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="snap-active"> <!-- По умолчанию включен магнит -->
+<body>
 
+    <!-- Меню (Фиксированное) -->
     <header class="top-bar">
-        <div class="logo" style="font-family: 'Alice'; font-size:1.3rem;">Handmade Soul</div>
+        <div class="logo">Handmade Soul</div>
         <div class="controls">
             <div class="search-box">
                 <input type="text" id="search-input" placeholder="Поиск">
             </div>
-            <button class="view-toggle" id="view-toggle-btn"><i class="fas fa-th-large"></i></button>
+            <button class="view-toggle" id="view-toggle-btn" title="Сменить вид">
+                <i class="fas fa-th-large"></i>
+            </button>
         </div>
     </header>
 
@@ -31,26 +34,30 @@
         <button class="cat-btn" data-cat="gifts">Подарки</button>
     </nav>
 
-    <!-- Секция приветствия -->
-    <div id="hero-wrapper">
-        <section class="hero-content">
-            <div class="hero-text">
-                <h1>Тепло рук,<br>в каждой детали</h1>
-                <p>Авторские работы Ольги Мартьяновой.</p>
-                <div class="scroll-down" onclick="scrollToGallery()">
-                    В коллекцию <br> <i class="fas fa-chevron-down"></i>
+    <!-- ГЛАВНЫЙ КОНТЕЙНЕР СКРОЛЛА -->
+    <!-- Именно он будет магнитить слайды -->
+    <div class="scroll-snap-container" id="main-scroller">
+        
+        <!-- 1. Секция Hero (Мама) -->
+        <section class="slide-section hero-section" id="hero-section">
+            <div class="content-wrapper hero-wrapper">
+                <div class="hero-text reveal-element">
+                    <h1>Тепло рук,<br>в каждой детали</h1>
+                    <p>Авторские работы Ольги Мартьяновой.</p>
+                    <div class="scroll-hint" onclick="scrollToNext()">
+                        В коллекцию <br> <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="hero-image reveal-element delay-100">
+                    <img src="/static/mom.jpg" alt="Мастер">
                 </div>
             </div>
-            <div class="hero-image">
-                <img src="/static/mom.jpg" alt="Мастер">
-            </div>
         </section>
-    </div>
 
-    <!-- Контейнер товаров -->
-    <main id="gallery-container">
+        <!-- 2. Сюда JS добавит товары -->
         <div id="dynamic-content"></div>
-    </main>
+
+    </div>
 
     <!-- Модалки -->
     <div id="vk-modal" class="modal">
@@ -66,7 +73,7 @@
     <div id="desc-modal" class="modal">
         <div class="modal-box large-box">
             <span class="close-modal" onclick="closeModal('desc-modal')">&times;</span>
-            <h3 id="desc-title" style="margin-top:0; font-family:'Alice'"></h3>
+            <h3 id="desc-title"></h3>
             <div class="desc-text" id="desc-text"></div>
         </div>
     </div>

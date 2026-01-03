@@ -3,10 +3,28 @@ let currentCategory = 'all';
 let viewMode = 'feed';
 let itemsData = []; 
 
+// Настройка Анимации появления
+const observerOptions = {
+    root: document.getElementById('main-scroller'), // Следим внутри скролл-контейнера
+    threshold: 0.2 // Срабатывает когда видно 20% элемента
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, observerOptions);
+
+
 document.addEventListener("DOMContentLoaded", () => {
     loadGallery();
     
-    // Поиск с задержкой (чтобы не дергалось)
+    // Наблюдаем за элементами в Hero секции сразу
+    document.querySelectorAll('.reveal-element').forEach(el => observer.observe(el));
+
+    // Поиск
     let debounce;
     document.getElementById('search-input').addEventListener('input', (e) => {
         clearTimeout(debounce);
@@ -26,42 +44,40 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('view-toggle-btn').addEventListener('click', toggleView);
 });
 
-function scrollToGallery() {
-    // Скроллим к первому элементу после Hero
-    const firstItem = document.querySelector('.slide-section');
-    if(firstItem) firstItem.scrollIntoView({ behavior: 'smooth' });
+function scrollToNext() {
+    const container = document.getElementById('main-scroller');
+    container.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
 }
 
 function toggleView() {
     viewMode = (viewMode === 'feed') ? 'grid' : 'feed';
     const btn = document.getElementById('view-toggle-btn');
+    const container = document.getElementById('main-scroller');
+    const content = document.getElementById('dynamic-content');
     
     if (viewMode === 'grid') {
         btn.innerHTML = '<i class="fas fa-stream"></i>';
-        document.body.classList.remove('snap-active'); // Выключаем магнит
+        container.classList.add('grid-active');
+        content.className = 'grid-container';
+        // В сетке скрываем Hero
+        document.getElementById('hero-section').style.display = 'none';
     } else {
         btn.innerHTML = '<i class="fas fa-th-large"></i>';
-        document.body.classList.add('snap-active'); // Включаем магнит
+        container.classList.remove('grid-active');
+        content.className = '';
+        document.getElementById('hero-section').style.display = 'flex';
     }
     renderItems(); 
 }
 
 async function loadGallery(search = '') {
-    const hero = document.getElementById('hero-wrapper');
-    const container = document.getElementById('dynamic-content');
+    const hero = document.getElementById('hero-section');
     
-    // Логика отображения Hero секции
-    if (search || currentCategory !== 'all') {
-        hero.style.display = 'none';
-        // Если поиск, выключаем магнит, чтобы удобно листать результаты
-        document.body.classList.remove('snap-active');
-    } else {
-        if(viewMode === 'feed') {
-             hero.style.display = 'flex';
-             document.body.classList.add('snap-active'); // Включаем магнит на главной
-        } else {
-             hero.style.display = 'none';
-        }
+    // Если поиск - скрываем Hero и переключаем в Grid (удобнее искать)
+    if (search) {
+        if(viewMode === 'feed') toggleView(); // Принудительно в сетку при поиске
+    } else if (currentCategory === 'all' && viewMode === 'feed') {
+        hero.style.display = 'flex';
     }
 
     let url = `/api/items?`;
@@ -86,9 +102,12 @@ function renderItems() {
 
     itemsData.forEach(item => {
         const el = document.createElement('div');
+        
         if (viewMode === 'feed') {
-            el.className = 'slide-section'; // Секция для магнитного скролла
+            el.className = 'slide-section';
             el.innerHTML = getFeedHTML(item);
+            // Добавляем наблюдение за анимацией
+            el.querySelectorAll('.reveal-element').forEach(animEl => observer.observe(animEl));
         } else {
             el.className = 'grid-item';
             el.innerHTML = getGridHTML(item);
@@ -99,7 +118,6 @@ function renderItems() {
 
 function getFeedHTML(item) {
     const images = item.images.length ? item.images : ['/static/favicon.png'];
-    // Сохраняем ссылки для переключения
     const imagesAttr = JSON.stringify(images).replace(/"/g, '&quot;');
     
     const arrowBtns = images.length > 1 ? `
@@ -108,18 +126,21 @@ function getFeedHTML(item) {
     ` : '';
 
     return `
-        <div class="art-card">
-            <div class="art-img-wrapper">
-                <img src="${images[0]}" class="art-img" data-idx="0">
-                ${arrowBtns}
-            </div>
-            <div class="art-info">
-                <div>
-                    <h2 class="art-title">${item.title}</h2>
-                    <span class="art-price">${item.price} ₽</span>
+        <div class="content-wrapper">
+            <!-- Левая колонка: Фото -->
+            <div class="art-left-col reveal-element">
+                <div class="art-img-wrapper">
+                    <img src="${images[0]}" class="art-img" data-idx="0">
+                    ${arrowBtns}
                 </div>
+            </div>
+            
+            <!-- Правая колонка: Инфо -->
+            <div class="art-right-col reveal-element delay-100">
+                <h2 class="art-title">${item.title}</h2>
+                <div class="art-price">${item.price} ₽</div>
+                
                 <div class="btn-group">
-                    <!-- Передаем ID, а не текст описания, чтобы не ломалось -->
                     <button class="action-btn desc-btn" onclick="openDesc(${item.id})">Описание</button>
                     <button class="action-btn buy-btn" onclick="openVk(${item.id})">Купить</button>
                 </div>
@@ -132,46 +153,35 @@ function getGridHTML(item) {
     const img = item.images.length ? item.images[0] : '';
     return `
         <img src="${img}" class="grid-img" loading="lazy">
-        <div class="grid-details">
+        <div class="grid-info">
             <b>${item.title}</b>
             <p>${item.price} ₽</p>
-            <button class="action-btn buy-btn" style="width:100%" onclick="openVk(${item.id})">Купить</button>
+            <button class="action-btn buy-btn" style="width:100%; font-size:0.9rem" onclick="openVk(${item.id})">Купить</button>
         </div>
     `;
 }
 
-// --- Анимация переключения фото ---
+// Анимация фото
 window.switchImage = function(btn, dir, images) {
     const wrapper = btn.parentElement;
     const imgTag = wrapper.querySelector('.art-img');
-    
-    // 1. Добавляем класс затухания
     imgTag.classList.add('fade-out');
-
-    // 2. Ждем 200мс, меняем картинку, убираем класс
     setTimeout(() => {
         let currentIdx = parseInt(imgTag.dataset.idx);
         let newIdx = currentIdx + dir;
-        
         if (newIdx < 0) newIdx = images.length - 1;
         if (newIdx >= images.length) newIdx = 0;
-        
         imgTag.src = images[newIdx];
         imgTag.dataset.idx = newIdx;
-        
-        // Когда картинка загрузится (из кэша быстро), убираем прозрачность
         imgTag.onload = () => imgTag.classList.remove('fade-out');
-        // На случай если она уже в кэше
         setTimeout(() => imgTag.classList.remove('fade-out'), 50);
-        
-    }, 200); // Время должно совпадать с CSS transition
+    }, 200);
 };
 
-// --- Модальные окна ---
+// Модалки
 window.openVk = function(id) {
     const item = itemsData.find(i => i.id === id);
     if(!item) return;
-
     const text = `Здравствуйте! Хочу купить "${item.title}" за ${item.price}р.`;
     navigator.clipboard.writeText(text);
     const url = `https://vk.com/write${VK_ID}?message=${encodeURIComponent(text)}`;
@@ -182,7 +192,6 @@ window.openVk = function(id) {
 window.openDesc = function(id) {
     const item = itemsData.find(i => i.id === id);
     if(!item) return;
-
     document.getElementById('desc-title').innerText = item.title;
     document.getElementById('desc-text').innerText = item.description;
     document.getElementById('desc-modal').style.display = 'block';
