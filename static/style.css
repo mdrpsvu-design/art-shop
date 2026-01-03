@@ -1,3 +1,5 @@
+--- START OF FILE style.css ---
+
 :root {
     --font-head: 'Cormorant Garamond', serif;
     --font-body: 'Montserrat', sans-serif;
@@ -31,6 +33,7 @@ body {
 .logo { 
     font-family: var(--font-head); font-size: 1.8rem; font-weight: 600; 
     text-transform: uppercase; letter-spacing: 2px;
+    cursor: pointer; /* Для кликабельности (Пункт 1) */
 }
 
 .header-right { display: flex; align-items: center; gap: 20px; }
@@ -67,24 +70,23 @@ body {
 }
 .cat-btn.active, .cat-btn:hover { color: var(--accent); font-weight: 600; }
 
-/* --- SCROLL CONTAINER (FIXED LOGIC) --- */
+/* --- SCROLL CONTAINER --- */
 .scroll-snap-container {
     height: 100vh; width: 100%;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
-    /* Убрали scroll-padding, чтобы избежать конфликтов */
 }
 
 /* --- SLIDE SECTION --- */
 .slide-section {
     height: 100vh; width: 100%;
-    scroll-snap-align: start; 
+    /* center работает надежнее, чем start, исправляя "два положения" (Пункт 2) */
+    scroll-snap-align: center; 
     scroll-snap-stop: always;
     display: flex; justify-content: center; align-items: center;
     position: relative;
     box-sizing: border-box;
-    /* Внутренний отступ компенсирует шапку */
     padding-top: var(--top-offset); 
 }
 
@@ -162,9 +164,9 @@ body {
 .contact-links { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
 .contact-row { text-decoration: none; color: #555; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-/* --- MOBILE ADAPTATION (FIXED) --- */
+/* --- MOBILE ADAPTATION --- */
 @media (max-width: 900px) {
-    :root { --top-offset: 100px; } /* Шапка чуть меньше места ест */
+    :root { --top-offset: 100px; } 
     
     .top-bar { padding: 0 1rem; }
     .logo { font-size: 1.4rem; }
@@ -174,14 +176,15 @@ body {
     /* Отключаем горизонтальный ряд для контента */
     .content-wrapper {
         flex-direction: column;
-        justify-content: flex-start; /* Начинаем сверху */
+        justify-content: flex-start; 
         padding: 0 20px;
         gap: 15px;
         text-align: center;
     }
 
     /* Hero Mobile */
-    .hero-wrapper { justify-content: center; } /* Центруем Hero */
+    /* Пункт 5: justify-content: flex-start + больше паддинга, чтобы текст не лез под шапку */
+    .hero-wrapper { justify-content: flex-start; padding-top: 130px; } 
     .hero-content { flex-direction: column-reverse; }
     .hero-image-box { margin-bottom: 20px; }
     .hero-img { width: 220px; height: 280px; }
@@ -189,16 +192,16 @@ body {
     
     /* Product Mobile */
     .art-left-col {
-        flex: 0 0 auto; /* Не растягивать */
-        height: 45vh; /* Картинка занимает 45% экрана */
+        flex: 0 0 auto; 
+        height: 45vh; 
         width: 100%;
-        align-items: flex-end; /* Прижать к низу блока */
+        align-items: flex-end; 
     }
     
     .art-right-col {
-        flex: 1; /* Остальное место для текста */
-        justify-content: flex-start; /* Текст начинается сразу под фото */
-        transform: none; opacity: 1; /* Без анимации на мобилках для скорости */
+        flex: 1; 
+        justify-content: flex-start; 
+        transform: none; opacity: 1; 
     }
     
     .art-img-container {
@@ -212,10 +215,23 @@ body {
     .art-cat { margin-bottom: 5px; }
     
     .btn-group { width: 100%; gap: 10px; }
-    .action-btn { flex: 1; padding: 12px 0; font-size: 0.75rem; }
+    /* Пункт 3: flex: 1 1 0 заставляет кнопки быть равной ширины независимо от текста */
+    .action-btn { flex: 1 1 0; padding: 12px 0; font-size: 0.75rem; width: 0; }
     
     /* Стрелки */
     .nav-arrow { width: 35px; height: 35px; background: rgba(255,255,255,0.8); }
     .prev-arrow { left: 0; }
     .next-arrow { right: 0; }
+
+    /* Пункт 4: Модальное окно влезает в экран */
+    .modal-box {
+        margin: 10vh auto; /* Меньше отступ сверху */
+        width: 90%;
+        padding: 25px;
+        max-height: 80vh; /* Ограничение высоты контейнера */
+        overflow-y: auto; /* Скролл внутри бокса, если не влезает */
+    }
+    .desc-text {
+        max-height: none; /* Убираем внутренний скролл текста, скроллит весь бокс */
+    }
 }

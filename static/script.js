@@ -1,3 +1,5 @@
+--- START OF FILE script.js ---
+
 const VK_ID = "487502463"; 
 let currentCategory = 'all';
 let itemsData = []; 
@@ -47,6 +49,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+// Функция сброса на главный экран (Пункт 1)
+function resetToHero() {
+    currentCategory = 'all';
+    document.getElementById('search-input').value = '';
+    // Сброс активного класса кнопок
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');
+    
+    // Плавный скролл в начало
+    document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Перезагрузка галереи
+    setTimeout(() => loadGallery(), 300);
+}
 
 function scrollToNext() {
     document.getElementById('main-scroller').scrollBy({ top: window.innerHeight, behavior: 'smooth' });

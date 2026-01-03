@@ -1,3 +1,5 @@
+--- START OF FILE main.py ---
+
 import os
 import secrets
 from typing import List, Optional
@@ -21,6 +23,9 @@ security = HTTPBasic()
 
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
 ADMIN_PASS = os.getenv("ADMIN_PASS", "art123")
+
+# Порядок категорий для сортировки
+CATEGORY_ORDER = ["doll", "weaving", "painting", "scrap", "decoupage", "gifts"]
 
 cloudinary.config( 
   cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"), 
@@ -51,7 +56,6 @@ class Item(Base):
     description = Column(String)
     price = Column(Float)
     category = Column(String)
-    # Связь с картинками: один товар - много картинок
     images = relationship("ItemImage", back_populates="item", cascade="all, delete-orphan")
 
 class ItemImage(Base):
@@ -89,7 +93,6 @@ async def read_root(request: Request):
 async def admin_panel(request: Request, username: str = Depends(get_current_username)):
     return templates.TemplateResponse("admin.html", {"request": request, "username": username})
 
-# Специальный маршрут для выхода (сбрасывает авторизацию в браузере)
 @app.get("/logout")
 def logout():
     return Response(
@@ -107,7 +110,19 @@ def get_items(category: Optional[str] = None, search: Optional[str] = None, db: 
         query = query.filter(Item.title.ilike(f"%{search}%"))
     
     items = query.all()
-    # Формируем красивый JSON с массивом картинок
+
+    # Сортировка согласно порядку категорий (Пункт 6)
+    # Если категория не в списке, она уходит в конец (index 99)
+    def sort_key(item):
+        try:
+            return CATEGORY_ORDER.index(item.category)
+        except ValueError:
+            return 99
+
+    # Сортируем только если выбрана "Коллекция" (все категории) и нет поиска
+    if (not category or category == "all") and not search:
+        items.sort(key=sort_key)
+
     result = []
     for i in items:
         result.append({
@@ -116,7 +131,7 @@ def get_items(category: Optional[str] = None, search: Optional[str] = None, db: 
             "description": i.description,
             "price": i.price,
             "category": i.category,
-            "images": [img.url for img in i.images] # Список URL
+            "images": [img.url for img in i.images]
         })
     return result
 
@@ -126,17 +141,15 @@ async def create_item(
     description: str = Form(...),
     price: float = Form(...),
     category: str = Form(...),
-    files: List[UploadFile] = File(...), # Принимаем список файлов!
+    files: List[UploadFile] = File(...),
     username: str = Depends(get_current_username),
     db: Session = Depends(get_db)
 ):
-    # Создаем товар
     new_item = Item(title=title, description=description, price=price, category=category)
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
 
-    # Загружаем каждую картинку
     for file in files:
         res = cloudinary.uploader.upload(file.file)
         img_url = res.get("secure_url")

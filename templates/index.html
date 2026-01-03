@@ -1,3 +1,5 @@
+--- START OF FILE index.html ---
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -13,7 +15,8 @@
 
     <!-- Шапка -->
     <header class="top-bar">
-        <div class="logo">Handmade Soul</div>
+        <!-- Клик по логотипу возвращает к началу (Пункт 1) -->
+        <div class="logo" onclick="resetToHero()">Handmade Soul</div>
         
         <div class="header-right">
             <button class="contact-trigger" onclick="openModal('contacts-modal')">Контакты</button>
@@ -21,7 +24,6 @@
                 <input type="text" id="search-input" placeholder="Поиск...">
                 <i class="fas fa-search search-icon"></i>
             </div>
-            <!-- Кнопка смены вида УДАЛЕНА -->
         </div>
     </header>
 
