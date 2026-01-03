@@ -1,5 +1,3 @@
---- START OF FILE script.js ---
-
 const VK_ID = "487502463"; 
 let currentCategory = 'all';
 let itemsData = []; 

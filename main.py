@@ -1,5 +1,3 @@
---- START OF FILE main.py ---
-
 import os
 import secrets
 from typing import List, Optional
