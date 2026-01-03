@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from sqlalchemy import create_engine, Column, Integer, String, Float, or_
+from sqlalchemy import create_engine, Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import cloudinary
@@ -19,11 +19,11 @@ load_dotenv()
 app = FastAPI()
 security = HTTPBasic()
 
-# Настройки админки (Логин/Пароль)
+# Настройки админки
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
-ADMIN_PASS = os.getenv("ADMIN_PASS", "art123") # Поменяйте на свой сложный пароль в .env
+ADMIN_PASS = os.getenv("ADMIN_PASS", "art123")
 
-# --- База и Cloudinary (без изменений) ---
+# --- База и Cloudinary ---
 cloudinary.config( 
   cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"), 
   api_key = os.getenv("CLOUDINARY_API_KEY"), 
@@ -33,13 +33,24 @@ cloudinary.config(
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///./database.db"
     connect_args = {"check_same_thread": False}
+    # Для SQLite пул не нужен, но движок создаем так же
+    engine = create_engine(DATABASE_URL, connect_args=connect_args)
 else:
     connect_args = {}
+    # !!! ВАЖНОЕ ИСПРАВЛЕНИЕ НИЖЕ !!!
+    # pool_pre_ping=True проверяет соединение перед использованием
+    # pool_recycle=1800 обновляет соединение каждые 30 минут
+    engine = create_engine(
+        DATABASE_URL, 
+        connect_args=connect_args,
+        pool_pre_ping=True, 
+        pool_recycle=1800
+    )
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -49,7 +60,7 @@ class Item(Base):
     title = Column(String, index=True)
     description = Column(String)
     price = Column(Float)
-    category = Column(String) # doll, weaving, painting, scrap, decoupage, gifts
+    category = Column(String)
     image_url = Column(String)
 
 Base.metadata.create_all(bind=engine)
@@ -93,14 +104,10 @@ def get_items(
     db: Session = Depends(get_db)
 ):
     query = db.query(Item)
-    
     if category and category != "all":
         query = query.filter(Item.category == category)
-    
     if search:
-        # Поиск по названию (регистронезависимый для SQL, для SQLite может зависеть от настроек)
         query = query.filter(Item.title.ilike(f"%{search}%"))
-        
     return query.all()
 
 @app.post("/api/items")
@@ -110,11 +117,13 @@ async def create_item(
     price: float = Form(...),
     category: str = Form(...),
     file: UploadFile = File(...),
-    username: str = Depends(get_current_username), # Защита маршрута
+    username: str = Depends(get_current_username),
     db: Session = Depends(get_db)
 ):
+    # Отправка в Cloudinary
     result = cloudinary.uploader.upload(file.file)
     url = result.get("secure_url")
+    
     item = Item(title=title, description=description, price=price, category=category, image_url=url)
     db.add(item)
     db.commit()

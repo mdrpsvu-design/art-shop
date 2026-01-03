@@ -21,11 +21,11 @@
     <div class="container">
         <div class="header">
             <h2>Добавить работу</h2>
-            <!-- Простой сброс авторизации через подмену URL -->
             <a href="http://logout:logout@" onclick="location.reload()" style="color: #666; text-decoration: none;">Выйти</a>
         </div>
         
-        <form id="add-form">
+        <!-- Добавили method="POST", чтобы даже при ошибке JS данные не шли в URL -->
+        <form id="add-form" method="POST" enctype="multipart/form-data">
             <input type="text" name="title" placeholder="Название изделия" required>
             <textarea name="description" placeholder="Описание (материалы, размеры)" rows="3" required></textarea>
             <input type="number" name="price" placeholder="Цена (₽)" required>
@@ -58,43 +58,56 @@
             'scrap': 'Скрапбукинг', 'decoupage': 'Декупаж', 'gifts': 'Подарки'
         };
 
-        async def loadItems() {
-            const res = await fetch('/api/items');
-            const items = await res.json();
-            list.innerHTML = '';
-            items.forEach(item => {
-                list.innerHTML += `
-                    <div class="item-row">
-                        <div class="item-info">
-                            <img src="${item.image_url}" class="thumb">
-                            <div>
-                                <strong>${item.title}</strong><br>
-                                <small>${catNames[item.category] || item.category} | ${item.price} ₽</small>
+        // ИСПРАВЛЕНИЕ: здесь было написано async def, а нужно async function
+        async function loadItems() {
+            try {
+                const res = await fetch('/api/items');
+                if (!res.ok) throw new Error("Ошибка сети");
+                const items = await res.json();
+                list.innerHTML = '';
+                items.forEach(item => {
+                    list.innerHTML += `
+                        <div class="item-row">
+                            <div class="item-info">
+                                <img src="${item.image_url}" class="thumb">
+                                <div>
+                                    <strong>${item.title}</strong><br>
+                                    <small>${catNames[item.category] || item.category} | ${item.price} ₽</small>
+                                </div>
                             </div>
+                            <button class="delete-btn" onclick="deleteItem(${item.id})">Удалить</button>
                         </div>
-                        <button class="delete-btn" onclick="deleteItem(${item.id})">Удалить</button>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } catch (e) {
+                console.error("Не удалось загрузить товары:", e);
+                list.innerHTML = "<p style='color:red'>Ошибка загрузки списка (БД недоступна)</p>";
+            }
         }
 
         form.onsubmit = async (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Останавливаем стандартную отправку
             const btn = form.querySelector('button');
             const originalText = btn.innerText;
             btn.innerText = 'Загрузка...';
             btn.disabled = true;
 
             const formData = new FormData(form);
-            const res = await fetch('/api/items', { method: 'POST', body: formData });
             
-            if (res.ok) {
-                alert('Работа добавлена!');
-                form.reset();
-                loadItems();
-            } else {
-                alert('Ошибка загрузки');
+            try {
+                const res = await fetch('/api/items', { method: 'POST', body: formData });
+                if (res.ok) {
+                    alert('Работа добавлена!');
+                    form.reset();
+                    loadItems();
+                } else {
+                    const err = await res.json();
+                    alert('Ошибка: ' + JSON.stringify(err));
+                }
+            } catch (error) {
+                alert('Ошибка соединения: ' + error);
             }
+            
             btn.innerText = originalText;
             btn.disabled = false;
         };
@@ -106,6 +119,7 @@
             }
         }
 
+        // Запускаем загрузку при старте
         loadItems();
     </script>
 </body>
