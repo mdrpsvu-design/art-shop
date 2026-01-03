@@ -5,32 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/favicon.png">
     <title>Handmade Soul | Ольга Мартьянова</title>
-    <!-- Подключаем красивые шрифты: Cormorant Garamond (для заголовков) и Montserrat (для текста) -->
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Шрифты: Cormorant (Заголовки), Montserrat (Текст) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-    <!-- Меню -->
+    <!-- Шапка (Стеклянная) -->
     <header class="top-bar">
         <div class="logo">Handmade Soul</div>
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Поиск...">
-                <i class="fas fa-search search-icon"></i>
+        
+        <div class="header-right">
+            <button class="contact-trigger" onclick="openModal('contacts-modal')">Контакты</button>
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Поиск...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <button class="view-toggle" id="view-toggle-btn" title="Сменить вид">
+                    <i class="fas fa-th-large"></i>
+                </button>
             </div>
-            <button class="view-toggle" id="view-toggle-btn" title="Сменить вид">
-                <i class="fas fa-th-large"></i>
-            </button>
         </div>
     </header>
 
-    <!-- Улучшенная навигация категорий -->
+    <!-- Навигация -->
     <nav class="category-nav">
         <div class="nav-inner">
-            <button class="cat-btn active" data-cat="all">Вся коллекция</button>
-            <button class="cat-btn" data-cat="doll">Традиционная кукла</button>
+            <button class="cat-btn active" data-cat="all">Коллекция</button>
+            <button class="cat-btn" data-cat="doll">Куклы</button>
             <button class="cat-btn" data-cat="weaving">Ткачество</button>
             <button class="cat-btn" data-cat="painting">Роспись</button>
             <button class="cat-btn" data-cat="scrap">Скрапбукинг</button>
@@ -39,48 +43,78 @@
         </div>
     </nav>
 
-    <!-- ГЛАВНЫЙ КОНТЕЙНЕР СКРОЛЛА -->
+    <!-- Основной контейнер (Магнитный скролл) -->
     <div class="scroll-snap-container" id="main-scroller">
         
-        <!-- Секция Hero (Мама) -->
+        <!-- Секция Hero -->
         <section class="slide-section hero-section" id="hero-section">
-            <!-- Декоративная рамка для главной -->
-            <div class="deco-frame hero-frame"></div>
+            <div class="hero-bg-overlay"></div> <!-- Фоновый декор -->
             
             <div class="content-wrapper">
-                <div class="hero-text reveal-element">
-                    <h1>Тепло рук,<br>в каждой детали</h1>
-                    <p>Авторские работы Ольги Мартьяновой: сохраняя традиции, создаем уют.</p>
+                <div class="hero-text reveal-slow">
+                    <h1>Искусство,<br>согревающее душу</h1>
+                    <p class="subtitle">Авторская мастерская Ольги Мартьяновой</p>
+                    <div class="separator"></div>
+                    <p class="bio">Традиции в современном прочтении. Каждая работа существует в единственном экземпляре.</p>
+                    
                     <div class="scroll-hint" onclick="scrollToNext()">
-                        Смотреть работы <br> <i class="fas fa-chevron-down"></i>
+                        <span>Начать просмотр</span>
+                        <div class="line"></div>
                     </div>
                 </div>
-                <div class="hero-image reveal-element delay-100">
-                    <img src="/static/mom.jpg" alt="Мастер">
+                
+                <div class="hero-image-box reveal-slower">
+                    <div class="frame-deco"></div>
+                    <img src="/static/mom.jpg" alt="Мастер" class="hero-img">
                 </div>
             </div>
         </section>
 
-        <!-- Сюда JS добавит товары -->
+        <!-- Контейнер для товаров -->
         <div id="dynamic-content"></div>
 
     </div>
 
-    <!-- Модалки -->
-    <div id="vk-modal" class="modal">
-        <div class="modal-box">
-            <span class="close-modal" onclick="closeModal('vk-modal')">&times;</span>
-            <i class="fab fa-vk vk-icon"></i>
-            <h3>Оформить заказ</h3>
-            <p>Название работы скопировано.</p>
-            <button id="vk-go-btn" class="action-btn buy-btn" style="width:100%">Перейти в диалог</button>
+    <!-- Модальные окна -->
+    
+    <!-- 1. Контакты -->
+    <div id="contacts-modal" class="modal fade-modal">
+        <div class="modal-box contact-box">
+            <span class="close-modal">&times;</span>
+            <h3>Связаться с автором</h3>
+            <p>Вы можете задать любой вопрос или обсудить индивидуальный заказ.</p>
+            <div class="contact-links">
+                <a href="https://vk.com/id487502463" target="_blank" class="contact-row">
+                    <i class="fab fa-vk"></i> <span>ВКонтакте</span>
+                </a>
+                <div class="contact-row">
+                    <i class="fas fa-envelope"></i> <span>olga.art@mail.ru</span>
+                </div>
+                <div class="contact-row">
+                    <i class="fas fa-map-marker-alt"></i> <span>Россия, г. Пермь</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="desc-modal" class="modal">
+    <!-- 2. Покупка -->
+    <div id="vk-modal" class="modal fade-modal">
+        <div class="modal-box">
+            <span class="close-modal">&times;</span>
+            <div class="icon-circle"><i class="fab fa-vk"></i></div>
+            <h3>Оформление заказа</h3>
+            <p>Мы скопировали название работы.</p>
+            <p class="small-text">Нажмите кнопку ниже, чтобы открыть диалог с мастером. Просто вставьте скопированный текст и отправьте.</p>
+            <button id="vk-go-btn" class="action-btn buy-btn full-width">Перейти к диалогу</button>
+        </div>
+    </div>
+
+    <!-- 3. Описание -->
+    <div id="desc-modal" class="modal fade-modal">
         <div class="modal-box large-box">
-            <span class="close-modal" onclick="closeModal('desc-modal')">&times;</span>
+            <span class="close-modal">&times;</span>
             <h3 id="desc-title"></h3>
+            <div class="separator-small"></div>
             <div class="desc-text" id="desc-text"></div>
         </div>
     </div>
