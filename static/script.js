@@ -3,41 +3,40 @@ let currentCategory = 'all';
 let viewMode = 'feed';
 let itemsData = []; 
 
-// Настройка Анимации появления
-const observerOptions = {
-    root: document.getElementById('main-scroller'), // Следим внутри скролл-контейнера
-    threshold: 0.2 // Срабатывает когда видно 20% элемента
-};
-
+// Анимация появления
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible');
     });
-}, observerOptions);
-
+}, { threshold: 0.15 });
 
 document.addEventListener("DOMContentLoaded", () => {
     loadGallery();
     
-    // Наблюдаем за элементами в Hero секции сразу
     document.querySelectorAll('.reveal-element').forEach(el => observer.observe(el));
 
-    // Поиск
     let debounce;
     document.getElementById('search-input').addEventListener('input', (e) => {
         clearTimeout(debounce);
         debounce = setTimeout(() => loadGallery(e.target.value), 500);
     });
 
-    // Категории
+    // Обработчик категорий
     document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            // 1. Активируем кнопку
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
+            
+            // 2. Меняем категорию
             currentCategory = e.target.dataset.cat;
-            loadGallery();
+            
+            // 3. Анимация полета вверх!
+            const scroller = document.getElementById('main-scroller');
+            scroller.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 4. Загружаем данные с небольшой задержкой (пока летит вверх)
+            setTimeout(() => loadGallery(), 300);
         });
     });
 
@@ -45,8 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function scrollToNext() {
-    const container = document.getElementById('main-scroller');
-    container.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+    document.getElementById('main-scroller').scrollBy({ top: window.innerHeight, behavior: 'smooth' });
 }
 
 function toggleView() {
@@ -59,13 +57,14 @@ function toggleView() {
         btn.innerHTML = '<i class="fas fa-stream"></i>';
         container.classList.add('grid-active');
         content.className = 'grid-container';
-        // В сетке скрываем Hero
         document.getElementById('hero-section').style.display = 'none';
+        // При переходе в сетку скроллим вверх
+        container.scrollTo({ top: 0 });
     } else {
         btn.innerHTML = '<i class="fas fa-th-large"></i>';
         container.classList.remove('grid-active');
         content.className = '';
-        document.getElementById('hero-section').style.display = 'flex';
+        if(currentCategory === 'all') document.getElementById('hero-section').style.display = 'flex';
     }
     renderItems(); 
 }
@@ -73,11 +72,12 @@ function toggleView() {
 async function loadGallery(search = '') {
     const hero = document.getElementById('hero-section');
     
-    // Если поиск - скрываем Hero и переключаем в Grid (удобнее искать)
     if (search) {
-        if(viewMode === 'feed') toggleView(); // Принудительно в сетку при поиске
+        if(viewMode === 'feed') toggleView(); 
     } else if (currentCategory === 'all' && viewMode === 'feed') {
         hero.style.display = 'flex';
+    } else {
+        hero.style.display = 'none';
     }
 
     let url = `/api/items?`;
@@ -96,7 +96,7 @@ function renderItems() {
     container.innerHTML = '';
     
     if (itemsData.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:50px;">Ничего не найдено</div>';
+        container.innerHTML = '<div style="text-align:center; padding:100px; font-size:1.2rem;">В этой категории пока нет работ.</div>';
         return;
     }
 
@@ -104,9 +104,11 @@ function renderItems() {
         const el = document.createElement('div');
         
         if (viewMode === 'feed') {
-            el.className = 'slide-section';
-            el.innerHTML = getFeedHTML(item);
-            // Добавляем наблюдение за анимацией
+            // Добавляем класс темы к секции
+            el.className = `slide-section theme-${item.category}`;
+            // Добавляем декоративные элементы (рамки)
+            el.innerHTML = getDecorationsHTML(item.category) + getFeedHTML(item);
+            
             el.querySelectorAll('.reveal-element').forEach(animEl => observer.observe(animEl));
         } else {
             el.className = 'grid-item';
@@ -116,10 +118,20 @@ function renderItems() {
     });
 }
 
+// Генерирует HTML для рамок в зависимости от категории
+function getDecorationsHTML(cat) {
+    let decos = '';
+    if (cat === 'doll') decos = '<div class="deco deco-top"></div><div class="deco deco-bottom"></div>';
+    if (cat === 'weaving') decos = '<div class="deco deco-left"></div><div class="deco deco-right"></div>';
+    if (cat === 'painting') decos = '<div class="deco deco-top"></div><div class="deco deco-bottom"></div><div class="deco deco-left"></div><div class="deco deco-right"></div>';
+    if (cat === 'decoupage') decos = '<div class="deco deco-corner deco-tl"></div><div class="deco deco-corner deco-tr"></div><div class="deco deco-corner deco-bl"></div><div class="deco deco-corner deco-br"></div>';
+    if (cat === 'gifts') decos = '<div class="deco"></div>';
+    return decos;
+}
+
 function getFeedHTML(item) {
     const images = item.images.length ? item.images : ['/static/favicon.png'];
     const imagesAttr = JSON.stringify(images).replace(/"/g, '&quot;');
-    
     const arrowBtns = images.length > 1 ? `
         <button class="slider-btn prev-btn" onclick="switchImage(this, -1, ${imagesAttr})">&#10094;</button>
         <button class="slider-btn next-btn" onclick="switchImage(this, 1, ${imagesAttr})">&#10095;</button>
@@ -127,22 +139,18 @@ function getFeedHTML(item) {
 
     return `
         <div class="content-wrapper">
-            <!-- Левая колонка: Фото -->
             <div class="art-left-col reveal-element">
                 <div class="art-img-wrapper">
                     <img src="${images[0]}" class="art-img" data-idx="0">
                     ${arrowBtns}
                 </div>
             </div>
-            
-            <!-- Правая колонка: Инфо -->
             <div class="art-right-col reveal-element delay-100">
                 <h2 class="art-title">${item.title}</h2>
                 <div class="art-price">${item.price} ₽</div>
-                
                 <div class="btn-group">
-                    <button class="action-btn desc-btn" onclick="openDesc(${item.id})">Описание</button>
-                    <button class="action-btn buy-btn" onclick="openVk(${item.id})">Купить</button>
+                    <button class="action-btn desc-btn" onclick="openDesc(${item.id})">О работе</button>
+                    <button class="action-btn buy-btn" onclick="openVk(${item.id})">Приобрести</button>
                 </div>
             </div>
         </div>
@@ -154,14 +162,13 @@ function getGridHTML(item) {
     return `
         <img src="${img}" class="grid-img" loading="lazy">
         <div class="grid-info">
-            <b>${item.title}</b>
-            <p>${item.price} ₽</p>
-            <button class="action-btn buy-btn" style="width:100%; font-size:0.9rem" onclick="openVk(${item.id})">Купить</button>
+            <div style="font-family:'Cormorant Garamond'; font-size:1.2rem; font-weight:bold;">${item.title}</div>
+            <div style="color:#b07d62;">${item.price} ₽</div>
+            <button class="action-btn buy-btn" style="width:100%; margin-top:10px;" onclick="openVk(${item.id})">Купить</button>
         </div>
     `;
 }
 
-// Анимация фото
 window.switchImage = function(btn, dir, images) {
     const wrapper = btn.parentElement;
     const imgTag = wrapper.querySelector('.art-img');
@@ -178,11 +185,10 @@ window.switchImage = function(btn, dir, images) {
     }, 200);
 };
 
-// Модалки
 window.openVk = function(id) {
     const item = itemsData.find(i => i.id === id);
     if(!item) return;
-    const text = `Здравствуйте! Хочу купить "${item.title}" за ${item.price}р.`;
+    const text = `Здравствуйте! Хочу приобрести работу "${item.title}" за ${item.price}р.`;
     navigator.clipboard.writeText(text);
     const url = `https://vk.com/write${VK_ID}?message=${encodeURIComponent(text)}`;
     document.getElementById('vk-go-btn').onclick = () => window.open(url, '_blank');

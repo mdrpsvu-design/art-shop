@@ -5,18 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/favicon.png">
     <title>Handmade Soul | Ольга Мартьянова</title>
-    <link href="https://fonts.googleapis.com/css2?family=Alice&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Подключаем красивые шрифты: Cormorant Garamond (для заголовков) и Montserrat (для текста) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-    <!-- Меню (Фиксированное) -->
+    <!-- Меню -->
     <header class="top-bar">
         <div class="logo">Handmade Soul</div>
         <div class="controls">
             <div class="search-box">
-                <input type="text" id="search-input" placeholder="Поиск">
+                <input type="text" id="search-input" placeholder="Поиск...">
+                <i class="fas fa-search search-icon"></i>
             </div>
             <button class="view-toggle" id="view-toggle-btn" title="Сменить вид">
                 <i class="fas fa-th-large"></i>
@@ -24,28 +26,33 @@
         </div>
     </header>
 
+    <!-- Улучшенная навигация категорий -->
     <nav class="category-nav">
-        <button class="cat-btn active" data-cat="all">Все</button>
-        <button class="cat-btn" data-cat="doll">Куклы</button>
-        <button class="cat-btn" data-cat="weaving">Ткачество</button>
-        <button class="cat-btn" data-cat="painting">Роспись</button>
-        <button class="cat-btn" data-cat="scrap">Скрапбукинг</button>
-        <button class="cat-btn" data-cat="decoupage">Декупаж</button>
-        <button class="cat-btn" data-cat="gifts">Подарки</button>
+        <div class="nav-inner">
+            <button class="cat-btn active" data-cat="all">Вся коллекция</button>
+            <button class="cat-btn" data-cat="doll">Традиционная кукла</button>
+            <button class="cat-btn" data-cat="weaving">Ткачество</button>
+            <button class="cat-btn" data-cat="painting">Роспись</button>
+            <button class="cat-btn" data-cat="scrap">Скрапбукинг</button>
+            <button class="cat-btn" data-cat="decoupage">Декупаж</button>
+            <button class="cat-btn" data-cat="gifts">Подарки</button>
+        </div>
     </nav>
 
     <!-- ГЛАВНЫЙ КОНТЕЙНЕР СКРОЛЛА -->
-    <!-- Именно он будет магнитить слайды -->
     <div class="scroll-snap-container" id="main-scroller">
         
-        <!-- 1. Секция Hero (Мама) -->
+        <!-- Секция Hero (Мама) -->
         <section class="slide-section hero-section" id="hero-section">
-            <div class="content-wrapper hero-wrapper">
+            <!-- Декоративная рамка для главной -->
+            <div class="deco-frame hero-frame"></div>
+            
+            <div class="content-wrapper">
                 <div class="hero-text reveal-element">
                     <h1>Тепло рук,<br>в каждой детали</h1>
-                    <p>Авторские работы Ольги Мартьяновой.</p>
+                    <p>Авторские работы Ольги Мартьяновой: сохраняя традиции, создаем уют.</p>
                     <div class="scroll-hint" onclick="scrollToNext()">
-                        В коллекцию <br> <i class="fas fa-chevron-down"></i>
+                        Смотреть работы <br> <i class="fas fa-chevron-down"></i>
                     </div>
                 </div>
                 <div class="hero-image reveal-element delay-100">
@@ -54,7 +61,7 @@
             </div>
         </section>
 
-        <!-- 2. Сюда JS добавит товары -->
+        <!-- Сюда JS добавит товары -->
         <div id="dynamic-content"></div>
 
     </div>
@@ -64,9 +71,9 @@
         <div class="modal-box">
             <span class="close-modal" onclick="closeModal('vk-modal')">&times;</span>
             <i class="fab fa-vk vk-icon"></i>
-            <h3>Заказать</h3>
-            <p>Текст скопирован.</p>
-            <button id="vk-go-btn" class="action-btn buy-btn" style="width:100%">Перейти в ВК</button>
+            <h3>Оформить заказ</h3>
+            <p>Название работы скопировано.</p>
+            <button id="vk-go-btn" class="action-btn buy-btn" style="width:100%">Перейти в диалог</button>
         </div>
     </div>
 
