@@ -1,3 +1,5 @@
+--- START OF FILE style.css ---
+
 :root {
     --font-head: 'Cormorant Garamond', serif;
     --font-body: 'Montserrat', sans-serif;
@@ -8,7 +10,6 @@
     
     --header-height: 70px;
     --nav-height: 50px;
-    /* Суммарная высота шапки, на которую нужно опустить контент */
     --top-offset: 120px; 
 }
 
@@ -17,7 +18,7 @@ body {
     font-family: var(--font-body);
     background-color: var(--bg-color);
     color: var(--text);
-    overflow: hidden; /* Скроллит только контейнер */
+    overflow: hidden;
 }
 
 /* --- HEADER --- */
@@ -31,7 +32,7 @@ body {
 .logo { 
     font-family: var(--font-head); font-size: 1.8rem; font-weight: 600; 
     text-transform: uppercase; letter-spacing: 2px;
-    cursor: pointer; /* Для кликабельности (Пункт 1) */
+    cursor: pointer;
 }
 
 .header-right { display: flex; align-items: center; gap: 20px; }
@@ -43,30 +44,48 @@ body {
 }
 .contact-trigger:hover { color: var(--accent); }
 
+/* --- ИСПРАВЛЕНИЕ 1: Ровная лупа --- */
+.search-box { 
+    position: relative; /* База для позиционирования иконки */
+    display: flex; align-items: center;
+}
 .search-box input { 
     background: transparent; border: none; border-bottom: 1px solid #ccc;
-    padding: 5px; font-family: var(--font-body); width: 100px;
+    padding: 5px 25px 5px 5px; /* Отступ справа для иконки */
+    font-family: var(--font-body); width: 100px;
     transition: width 0.3s;
 }
 .search-box input:focus { width: 150px; outline: none; border-color: var(--accent); }
-.search-icon { color: #ccc; margin-left: -20px; pointer-events: none; }
+.search-icon { 
+    position: absolute; right: 0; top: 50%; 
+    transform: translateY(-50%); /* Центрирование по вертикали */
+    color: #ccc; pointer-events: none; margin: 0; 
+}
 
-/* --- NAV --- */
+/* --- NAV (ИСПРАВЛЕНИЕ 2: Стиль меню) --- */
 .category-nav {
     position: fixed; top: var(--header-height); left: 0; width: 100%; height: var(--nav-height);
     background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
     z-index: 900; border-bottom: 1px solid rgba(0,0,0,0.03);
     display: flex; justify-content: center;
 }
-.nav-inner { display: flex; gap: 15px; overflow-x: auto; padding: 0 20px; align-items: center; scrollbar-width: none; }
+.nav-inner { display: flex; gap: 20px; overflow-x: auto; padding: 0 20px; align-items: center; scrollbar-width: none; }
 .nav-inner::-webkit-scrollbar { display: none; }
 
 .cat-btn {
     background: none; border: none; font-family: var(--font-body);
     font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
-    color: #888; cursor: pointer; transition: 0.3s; white-space: nowrap;
+    color: #888; cursor: pointer; transition: color 0.3s; 
+    position: relative; padding-bottom: 5px; white-space: nowrap;
 }
-.cat-btn.active, .cat-btn:hover { color: var(--accent); font-weight: 600; }
+
+/* Анимация подчеркивания */
+.cat-btn::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px;
+    background: var(--accent); transition: width 0.3s ease;
+}
+.cat-btn:hover::after, .cat-btn.active::after { width: 100%; }
+.cat-btn.active, .cat-btn:hover { color: var(--accent); font-weight: 500; }
 
 /* --- SCROLL CONTAINER --- */
 .scroll-snap-container {
@@ -76,10 +95,16 @@ body {
     scroll-behavior: smooth;
 }
 
+/* Контейнер для контента с плавным появлением (ИСПРАВЛЕНИЕ 4) */
+#dynamic-content {
+    transition: opacity 0.4s ease-in-out;
+    opacity: 1;
+}
+#dynamic-content.fading { opacity: 0; }
+
 /* --- SLIDE SECTION --- */
 .slide-section {
     height: 100vh; width: 100%;
-    /* center работает надежнее, чем start, исправляя "два положения" (Пункт 2) */
     scroll-snap-align: center; 
     scroll-snap-stop: always;
     display: flex; justify-content: center; align-items: center;
@@ -171,7 +196,6 @@ body {
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* Отключаем горизонтальный ряд для контента */
     .content-wrapper {
         flex-direction: column;
         justify-content: flex-start; 
@@ -180,15 +204,12 @@ body {
         text-align: center;
     }
 
-    /* Hero Mobile */
-    /* Пункт 5: justify-content: flex-start + больше паддинга, чтобы текст не лез под шапку */
     .hero-wrapper { justify-content: flex-start; padding-top: 130px; } 
     .hero-content { flex-direction: column-reverse; }
     .hero-image-box { margin-bottom: 20px; }
     .hero-img { width: 220px; height: 280px; }
     .hero-text h1 { font-size: 2.5rem; }
     
-    /* Product Mobile */
     .art-left-col {
         flex: 0 0 auto; 
         height: 45vh; 
@@ -212,24 +233,26 @@ body {
     .art-price { font-size: 1.4rem; margin-bottom: 15px; }
     .art-cat { margin-bottom: 5px; }
     
+    /* ИСПРАВЛЕНИЕ 3: Кнопки строго одинаковые */
     .btn-group { width: 100%; gap: 10px; }
-    /* Пункт 3: flex: 1 1 0 заставляет кнопки быть равной ширины независимо от текста */
-    .action-btn { flex: 1 1 0; padding: 12px 0; font-size: 0.75rem; width: 0; }
+    .action-btn { 
+        flex: 1; /* Растягиваться равномерно */
+        width: auto; 
+        min-width: 0; /* Игнорировать ширину контента при расчете flex */
+        padding: 12px 0; 
+        font-size: 0.75rem; 
+    }
     
-    /* Стрелки */
     .nav-arrow { width: 35px; height: 35px; background: rgba(255,255,255,0.8); }
     .prev-arrow { left: 0; }
     .next-arrow { right: 0; }
 
-    /* Пункт 4: Модальное окно влезает в экран */
     .modal-box {
-        margin: 10vh auto; /* Меньше отступ сверху */
+        margin: 10vh auto;
         width: 90%;
         padding: 25px;
-        max-height: 80vh; /* Ограничение высоты контейнера */
-        overflow-y: auto; /* Скролл внутри бокса, если не влезает */
+        max-height: 80vh; 
+        overflow-y: auto;
     }
-    .desc-text {
-        max-height: none; /* Убираем внутренний скролл текста, скроллит весь бокс */
-    }
+    .desc-text { max-height: none; }
 }

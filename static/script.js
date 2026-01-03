@@ -1,18 +1,39 @@
+--- START OF FILE script.js ---
+
 const VK_ID = "487502463"; 
 let currentCategory = 'all';
 let itemsData = []; 
 
-// Анимация при скролле
-const observer = new IntersectionObserver((entries) => {
+// Основной observer для анимации появления текста/картинок
+const animationObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('visible');
     });
 }, { threshold: 0.1 });
 
+// ИСПРАВЛЕНИЕ 4 (Часть 1): Шпион для меню категорий при скролле
+const spyObserver = new IntersectionObserver((entries) => {
+    // Работает только если мы смотрим всю коллекцию, иначе меню должно стоять на выбранной категории
+    if (currentCategory !== 'all') return;
+
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const cat = entry.target.dataset.cat;
+            if (cat) highlightMenu(cat);
+        }
+    });
+}, { threshold: 0.5 }); // Срабатывает, когда товар на 50% на экране
+
+function highlightMenu(cat) {
+    document.querySelectorAll('.cat-btn').forEach(b => {
+        if (b.dataset.cat === cat) b.classList.add('active');
+        else b.classList.remove('active');
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     loadGallery();
     
-    // Анимация Hero
     setTimeout(() => {
         const hText = document.querySelector('.hero-text');
         const hImg = document.querySelector('.hero-image-box');
@@ -20,56 +41,60 @@ document.addEventListener("DOMContentLoaded", () => {
         if(hImg) hImg.classList.add('visible');
     }, 100);
 
-    // Закрытие модалок по фону
     window.onclick = function(event) {
         if (event.target.classList.contains('modal')) {
             closeModal(event.target.id);
         }
     }
 
-    // Поиск
     let debounce;
     document.getElementById('search-input').addEventListener('input', (e) => {
         clearTimeout(debounce);
         debounce = setTimeout(() => loadGallery(e.target.value), 500);
     });
 
-    // Категории
     document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            // Если кликнули, жестко ставим активный класс
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
+            
             currentCategory = e.target.dataset.cat;
             
             // Скролл вверх
             document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
-            setTimeout(() => loadGallery(), 300);
+            
+            // Загрузка
+            loadGallery();
         });
     });
 });
 
-// Функция сброса на главный экран (Пункт 1)
 function resetToHero() {
     currentCategory = 'all';
     document.getElementById('search-input').value = '';
-    // Сброс активного класса кнопок
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');
-    
-    // Плавный скролл в начало
     document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Перезагрузка галереи
-    setTimeout(() => loadGallery(), 300);
+    loadGallery();
 }
 
 function scrollToNext() {
     document.getElementById('main-scroller').scrollBy({ top: window.innerHeight, behavior: 'smooth' });
 }
 
-// Загрузка
+// ИСПРАВЛЕНИЕ 4 (Часть 2): Плавное выцветание при смене
 async function loadGallery(search = '') {
     const hero = document.getElementById('hero-section');
+    const container = document.getElementById('dynamic-content');
+
+    // 1. Скрываем (Fade Out)
+    container.classList.add('fading');
+    
+    // Ждем анимацию исчезновения (300ms)
+    await new Promise(r => setTimeout(r, 300));
+
+    // Логика показа Hero
     if (search) hero.style.display = 'none';
     else if (currentCategory === 'all') hero.style.display = 'flex';
     else hero.style.display = 'none';
@@ -83,6 +108,11 @@ async function loadGallery(search = '') {
         itemsData = await res.json();
         renderItems();
     } catch (e) { console.error(e); }
+
+    // 2. Показываем (Fade In) с небольшой задержкой для рендеринга
+    requestAnimationFrame(() => {
+        container.classList.remove('fading');
+    });
 }
 
 function renderItems() {
@@ -97,10 +127,14 @@ function renderItems() {
     itemsData.forEach(item => {
         const el = document.createElement('section');
         el.className = `slide-section theme-${item.category}`;
+        // Добавляем data-cat для шпиона
+        el.dataset.cat = item.category; 
         el.innerHTML = getSlideHTML(item);
         container.appendChild(el);
-        // Запускаем наблюдение (чтобы текст выезжал)
-        observer.observe(el);
+        
+        // Подключаем наблюдателей
+        animationObserver.observe(el);
+        spyObserver.observe(el);
     });
 }
 
@@ -133,11 +167,10 @@ function getSlideHTML(item) {
     `;
 }
 
-// Смена слайда
 window.changeSlide = function(btn, dir, images) {
     const container = btn.parentElement;
     const imgTag = container.querySelector('.art-img');
-    imgTag.style.opacity = '0'; // fade out
+    imgTag.style.opacity = '0'; 
     setTimeout(() => {
         let currentIdx = parseInt(imgTag.dataset.idx);
         let newIdx = currentIdx + dir;
@@ -145,11 +178,10 @@ window.changeSlide = function(btn, dir, images) {
         if (newIdx >= images.length) newIdx = 0;
         imgTag.src = images[newIdx];
         imgTag.dataset.idx = newIdx;
-        imgTag.onload = () => { imgTag.style.opacity = '1'; }; // fade in
+        imgTag.onload = () => { imgTag.style.opacity = '1'; }; 
     }, 300);
 };
 
-// Модалки
 window.openModal = function(id) {
     document.getElementById(id).style.display = 'block';
 };
