@@ -70,31 +70,47 @@
     <!-- Модальные окна -->
     
     <!-- Контакты -->
-    <div id="contacts-modal" class="modal">
-        <div class="modal-box contact-box">
-            <span class="close-modal" onclick="closeModal('contacts-modal')">&times;</span>
-            <h3>Связь с автором</h3>
-            <div class="contact-links">
-                <a href="https://vk.com/id487502463" target="_blank" class="contact-row">
-                    <i class="fab fa-vk"></i> <span>ВКонтакте</span>
-                </a>
-                <div class="contact-row">
-                    <i class="fas fa-envelope"></i> <span>olyamartyanova.martyanova@yandex.ru</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="contacts-modal" class="modal">
+    <div class="modal-box contact-box">
+        <span class="close-modal" onclick="closeModal('contacts-modal')">&times;</span>
+        <h3>Связь с автором</h3>
+        <div class="contact-links">
+            
+            <a href="https://vk.com/id487502463" target="_blank" class="contact-row">
+                <i class="fab fa-vk"></i> <span>ВКонтакте</span>
+            </a>
 
-    <!-- Покупка -->
-    <div id="vk-modal" class="modal">
-        <div class="modal-box">
-            <span class="close-modal" onclick="closeModal('vk-modal')">&times;</span>
-            <div class="icon-circle"><i class="fab fa-vk"></i></div>
-            <h3>Заказ</h3>
-            <p>Текст заказа скопирован.</p>
-            <button id="vk-go-btn" class="action-btn buy-btn full-width">Перейти к диалогу</button>
+            <a href="https://t.me/martianovaolga" target="_blank" class="contact-row">
+                <i class="fab fa-telegram"></i> <span>Telegram</span>
+            </a>
+
+            <div class="contact-row">
+                <i class="fas fa-envelope"></i> <span>olyamartyanova.martyanova@yandex.ru</span>
+            </div>
+            
         </div>
     </div>
+</div>
+
+<div id="tg-modal" class="modal">
+    <div class="modal-box">
+        <!-- Обратите внимание: ID модального окна теперь tg-modal -->
+        <span class="close-modal" onclick="closeModal('tg-modal')">&times;</span>
+        
+        <!-- Иконка Telegram -->
+        <div class="icon-circle" style="background: #0088cc; color: white;">
+            <i class="fab fa-telegram-plane"></i>
+        </div>
+        
+        <h3>Заказ</h3>
+        <p>Перейти в Telegram для оформления заказа.</p>
+        
+        <!-- ID кнопки теперь tg-go-btn -->
+        <button id="tg-go-btn" class="action-btn buy-btn full-width" style="background: #0088cc;">
+            Написать в Telegram
+        </button>
+    </div>
+</div>
 
     <!-- Описание -->
     <div id="desc-modal" class="modal">

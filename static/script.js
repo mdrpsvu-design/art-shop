@@ -1,4 +1,4 @@
-const VK_ID = "487502463"; 
+const TG_USER = "martianovaolga"; // Добавляем это (без @)
 let currentCategory = 'all';
 let itemsData = []; 
 
@@ -158,7 +158,7 @@ function getSlideHTML(item) {
                 <div class="art-price">${item.price} ₽</div>
                 <div class="btn-group">
                     <button class="action-btn desc-btn" onclick="openDesc(${item.id})">О работе</button>
-                    <button class="action-btn buy-btn" onclick="openVk(${item.id})">Купить</button>
+                    <button class="action-btn buy-btn" onclick="openTg(${item.id})">Купить</button>
                 </div>
             </div>
         </div>
@@ -188,14 +188,19 @@ window.closeModal = function(id) {
     document.getElementById(id).style.display = 'none';
 };
 
-window.openVk = function(id) {
+window.openTg = function(id) {
     const item = itemsData.find(i => i.id === id);
     if(!item) return;
     const text = `Здравствуйте! Хочу приобрести "${item.title}" за ${item.price}р.`;
-    navigator.clipboard.writeText(text);
-    const url = `https://vk.com/write${VK_ID}?message=${encodeURIComponent(text)}`;
-    document.getElementById('vk-go-btn').onclick = () => window.open(url, '_blank');
-    openModal('vk-modal');
+    
+    const url = `https://t.me/${TG_USER}?text=${encodeURIComponent(text)}`;
+
+    const btn = document.getElementById('tg-go-btn');
+    if (btn) {
+        btn.onclick = () => window.open(url, '_blank');
+    }
+
+    openModal('tg-modal');
 };
 
 window.openDesc = function(id) {
