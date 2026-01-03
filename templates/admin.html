@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input, select, textarea { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #333; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .item-list { margin-top: 30px; }
+        .item-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .delete-btn { background: red; font-size: 0.8rem; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Добавить новую работу</h2>
+        <form id="add-form">
+            <input type="text" name="title" placeholder="Название картины" required>
+            <textarea name="description" placeholder="Описание (размеры, материалы, история)" required></textarea>
+            <input type="number" name="price" placeholder="Цена" required>
+            <select name="category">
+                <option value="watercolor">Акварель</option>
+                <option value="oil">Масло</option>
+                <option value="graphic">Графика</option>
+            </select>
+            <input type="file" name="file" required>
+            <button type="submit">Добавить товар</button>
+        </form>
+
+        <h3>Список товаров</h3>
+        <div id="items-list" class="item-list"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('add-form');
+        
+        // Загрузка товаров
+        async function loadAdminItems() {
+            const res = await fetch('/api/items');
+            const items = await res.json();
+            const list = document.getElementById('items-list');
+            list.innerHTML = '';
+            items.forEach(item => {
+                list.innerHTML += `
+                    <div class="item-row">
+                        <span>${item.title} (${item.category})</span>
+                        <button class="delete-btn" onclick="deleteItem(${item.id})">Удалить</button>
+                    </div>
+                `;
+            });
+        }
+
+        // Добавление
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const res = await fetch('/api/items', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert('Работа добавлена!');
+                form.reset();
+                loadAdminItems();
+            }
+        };
+
+        // Удаление
+        async function deleteItem(id) {
+            if(confirm('Точно удалить?')) {
+                await fetch(`/api/items/${id}`, { method: 'DELETE' });
+                loadAdminItems();
+            }
+        }
+
+        loadAdminItems();
+    </script>
+</body>
+</html>
