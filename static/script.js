@@ -1,23 +1,16 @@
-const VK_USER_ID = "487502463"; // ID Вашей мамы
+const VK_ID = "487502463"; 
 let currentCategory = 'all';
-let viewMode = 'feed'; // 'feed' or 'grid'
-let searchQuery = '';
+let viewMode = 'feed';
+let itemsData = []; // Храним загруженные данные
 
 document.addEventListener("DOMContentLoaded", () => {
     loadGallery();
-    setupControls();
-});
-
-// Наблюдатель для анимаций в ленте
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-        }
+    
+    // Поиск
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        loadGallery(e.target.value);
     });
-}, { threshold: 0.4 });
 
-function setupControls() {
     // Категории
     document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -28,130 +21,150 @@ function setupControls() {
         });
     });
 
-    // Поиск (Debounce)
-    const searchInput = document.getElementById('search-input');
-    let timeout = null;
-    searchInput.addEventListener('input', (e) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            searchQuery = e.target.value.trim();
-            loadGallery();
-        }, 500);
-    });
-
     // Переключение вида
-    const toggleBtn = document.getElementById('view-toggle-btn');
-    const container = document.getElementById('gallery-container');
-    
-    toggleBtn.addEventListener('click', () => {
-        if (viewMode === 'feed') {
-            viewMode = 'grid';
-            container.className = 'grid-mode';
-            toggleBtn.innerHTML = '<i class="fas fa-stream"></i>'; // Иконка списка
-        } else {
-            viewMode = 'feed';
-            container.className = 'feed-mode';
-            toggleBtn.innerHTML = '<i class="fas fa-th-large"></i>'; // Иконка сетки
-        }
-        loadGallery(); // Перерисовать контент
-    });
+    document.getElementById('view-toggle-btn').addEventListener('click', toggleView);
+});
+
+function scrollToGallery() {
+    const el = document.getElementById('gallery-container');
+    el.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function loadGallery() {
+function toggleView() {
+    const container = document.getElementById('gallery-container');
+    const btn = document.getElementById('view-toggle-btn');
+    if (viewMode === 'feed') {
+        viewMode = 'grid';
+        container.className = 'grid-mode';
+        btn.innerHTML = '<i class="fas fa-stream"></i>';
+    } else {
+        viewMode = 'feed';
+        container.className = 'feed-mode';
+        btn.innerHTML = '<i class="fas fa-th-large"></i>';
+    }
+    renderItems(); // Перерисовка без перезагрузки
+}
+
+async function loadGallery(search = '') {
+    const hero = document.getElementById('hero-wrapper');
     const container = document.getElementById('dynamic-content');
-    container.innerHTML = '<div style="text-align:center; padding:20px;">Загрузка...</div>';
     
-    // Скрываем/показываем Hero секцию
-    const hero = document.getElementById('hero');
-    if (viewMode === 'grid' || currentCategory !== 'all' || searchQuery !== '') {
+    // Скрываем Hero, если ищем или фильтруем
+    if (search || currentCategory !== 'all') {
         hero.style.display = 'none';
+        container.style.paddingTop = '120px'; // Отступ для фиксированной шапки
     } else {
         hero.style.display = 'flex';
+        container.style.paddingTop = '0';
     }
 
+    let url = `/api/items?`;
+    if (currentCategory !== 'all') url += `category=${currentCategory}&`;
+    if (search) url += `search=${search}`;
+
     try {
-        let url = `/api/items?`;
-        if (currentCategory !== 'all') url += `category=${currentCategory}&`;
-        if (searchQuery) url += `search=${searchQuery}`;
-
         const res = await fetch(url);
-        let items = await res.json();
-        
-        container.innerHTML = '';
-
-        if (items.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:50px; width:100%;">Работ не найдено. Попробуйте другую категорию.</div>';
-            return;
-        }
-
-        items.forEach(item => {
-            const html = viewMode === 'feed' ? createSlideHtml(item) : createGridHtml(item);
-            const el = document.createElement('div');
-            // Для ленты это section, для сетки div
-            if (viewMode === 'feed') {
-                el.className = `slide-section theme-${item.category}`;
-                el.innerHTML = html;
-                observer.observe(el);
-            } else {
-                el.className = 'grid-item';
-                el.innerHTML = html;
-            }
-            container.appendChild(el);
-        });
-
+        itemsData = await res.json();
+        renderItems();
     } catch (e) {
         console.error(e);
-        container.innerHTML = 'Ошибка загрузки данных.';
     }
 }
 
-function createSlideHtml(item) {
+function renderItems() {
+    const container = document.getElementById('dynamic-content');
+    container.innerHTML = '';
+    
+    if (itemsData.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:50px;">Ничего не найдено</div>';
+        return;
+    }
+
+    itemsData.forEach(item => {
+        const el = document.createElement('div');
+        if (viewMode === 'feed') {
+            el.className = 'slide-section';
+            el.innerHTML = getFeedHTML(item);
+        } else {
+            el.className = 'grid-item';
+            el.innerHTML = getGridHTML(item);
+        }
+        container.appendChild(el);
+    });
+}
+
+function getFeedHTML(item) {
+    // Если картинок нет, ставим заглушку. Если есть, берем первую.
+    const images = item.images.length ? item.images : ['/static/placeholder.png'];
+    // Сохраняем массив картинок в data-атрибут (или в JS переменную, но так проще)
+    const imagesJson = JSON.stringify(images).replace(/"/g, '&quot;');
+    
+    const arrowBtns = images.length > 1 ? `
+        <button class="slider-btn prev-btn" onclick="switchImage(this, -1, ${imagesJson})">&#10094;</button>
+        <button class="slider-btn next-btn" onclick="switchImage(this, 1, ${imagesJson})">&#10095;</button>
+    ` : '';
+
     return `
         <div class="art-card">
             <div class="art-img-wrapper">
-                <img src="${item.image_url}" class="art-img" alt="${item.title}">
+                <img src="${images[0]}" class="art-img" data-idx="0">
+                ${arrowBtns}
             </div>
             <div class="art-info">
                 <div>
                     <h2 class="art-title">${item.title}</h2>
-                    <span style="font-weight:bold; color:var(--accent);">${item.price} ₽</span>
+                    <span style="color:var(--accent); font-weight:bold;">${item.price} ₽</span>
                 </div>
-                <button class="buy-btn" onclick="openVkModal('${item.title}', ${item.price})">Купить</button>
+                <div class="btn-group">
+                    <button class="action-btn desc-btn" onclick="openDesc('${item.title}', \`${item.description}\`)">Описание</button>
+                    <button class="action-btn" onclick="openVk('${item.title}', ${item.price})">Купить</button>
+                </div>
             </div>
         </div>
     `;
 }
 
-function createGridHtml(item) {
+function getGridHTML(item) {
+    const img = item.images.length ? item.images[0] : '';
     return `
-        <img src="${item.image_url}" class="grid-img" loading="lazy">
+        <img src="${img}" class="grid-img">
         <div class="grid-details">
-            <h3 style="margin:0; font-family:var(--font-head); font-size:1.2rem;">${item.title}</h3>
-            <p style="color:#666; font-size:0.9rem;">${item.price} ₽</p>
-            <button class="buy-btn" style="width:100%; padding:8px;" onclick="openVkModal('${item.title}', ${item.price})">Купить</button>
+            <b>${item.title}</b>
+            <p>${item.price} ₽</p>
+            <button class="action-btn" style="width:100%" onclick="openVk('${item.title}', ${item.price})">Купить</button>
         </div>
     `;
 }
 
-// --- VK MODAL LOGIC ---
-const modal = document.getElementById('vk-modal');
-const closeBtn = document.querySelector('.close-modal');
-const vkGoBtn = document.getElementById('vk-go-btn');
-
-function openVkModal(title, price) {
-    const text = `Здравствуйте! Хочу приобрести работу "${title}" за ${price}р.`;
+// --- Слайдер картинок ---
+window.switchImage = function(btn, dir, images) {
+    const wrapper = btn.parentElement;
+    const imgTag = wrapper.querySelector('.art-img');
+    let currentIdx = parseInt(imgTag.dataset.idx);
     
-    // Копируем текст
-    navigator.clipboard.writeText(text).then(() => {
-        console.log('Copied');
-    }).catch(err => console.log('Copy failed', err));
-
-    // Настраиваем ссылку
-    const url = `https://vk.com/write${VK_USER_ID}?message=${encodeURIComponent(text)}`;
-    vkGoBtn.onclick = () => window.open(url, '_blank');
+    let newIdx = currentIdx + dir;
+    if (newIdx < 0) newIdx = images.length - 1;
+    if (newIdx >= images.length) newIdx = 0;
     
-    modal.style.display = 'block';
-}
+    imgTag.src = images[newIdx];
+    imgTag.dataset.idx = newIdx;
+};
 
-closeBtn.onclick = () => modal.style.display = 'none';
-window.onclick = (e) => { if (e.target == modal) modal.style.display = 'none'; };
+// --- Модальные окна ---
+window.openVk = function(title, price) {
+    const text = `Здравствуйте! Хочу купить "${title}" за ${price}р.`;
+    navigator.clipboard.writeText(text);
+    const url = `https://vk.com/write${VK_ID}?message=${encodeURIComponent(text)}`;
+    document.getElementById('vk-go-btn').onclick = () => window.open(url, '_blank');
+    document.getElementById('vk-modal').style.display = 'block';
+};
+
+window.openDesc = function(title, desc) {
+    document.getElementById('desc-title').innerText = title;
+    document.getElementById('desc-text').innerText = desc;
+    document.getElementById('desc-modal').style.display = 'block';
+};
+
+window.closeModal = function(id) {
+    document.getElementById(id).style.display = 'none';
+};

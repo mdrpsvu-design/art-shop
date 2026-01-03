@@ -4,37 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/favicon.png">
-    <title>Рукоделие & Искусство | Ольга Мартьянова</title>
-    <!-- Шрифты: Marck Script (рукописный) и Alice (для заголовков) -->
+    <title>Handmade Soul | Ольга Мартьянова</title>
     <link href="https://fonts.googleapis.com/css2?family=Alice&family=Marck+Script&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-    <!-- Верхняя панель управления -->
     <header class="top-bar">
         <div class="logo">Handmade <span style="font-family: 'Marck Script'; color: var(--accent);">Soul</span></div>
-        
         <div class="controls">
-            <!-- Поиск -->
             <div class="search-box">
-                <input type="text" id="search-input" placeholder="Поиск работы...">
+                <input type="text" id="search-input" placeholder="Поиск...">
                 <i class="fas fa-search"></i>
             </div>
-            
-            <!-- Переключатель вида -->
-            <button class="view-toggle" id="view-toggle-btn" title="Сменить вид">
-                <i class="fas fa-th-large"></i>
-            </button>
+            <button class="view-toggle" id="view-toggle-btn"><i class="fas fa-th-large"></i></button>
         </div>
     </header>
 
-    <!-- Категории (горизонтальный скролл на мобильных) -->
     <nav class="category-nav">
         <button class="cat-btn active" data-cat="all">Все</button>
-        <button class="cat-btn" data-cat="doll">Традиционная кукла</button>
+        <button class="cat-btn" data-cat="doll">Куклы</button>
         <button class="cat-btn" data-cat="weaving">Ткачество</button>
         <button class="cat-btn" data-cat="painting">Роспись</button>
         <button class="cat-btn" data-cat="scrap">Скрапбукинг</button>
@@ -42,17 +32,15 @@
         <button class="cat-btn" data-cat="gifts">Подарки</button>
     </nav>
 
-    <!-- Основной контейнер (класс меняется JS: feed-mode или grid-mode) -->
-    <main id="gallery-container" class="feed-mode">
-        
-        <!-- Приветствие (Видно только в режиме ленты "Все") -->
-        <section class="slide-section hero-section" id="hero">
+    <!-- Секция приветствия (Теперь вне контейнера скролла, чтобы контролировать видимость) -->
+    <div id="hero-wrapper">
+        <section class="hero-section">
             <div class="hero-content">
                 <div class="hero-text">
                     <h1>Тепло рук,<br>воплощенное в деталях</h1>
-                    <p>Авторские работы Ольги Мартьяновой: от народных традиций до современного декора.</p>
-                    <div class="scroll-down">
-                        <span>Смотреть коллекцию</span>
+                    <p>Авторские работы: традиции и уют для вашего дома.</p>
+                    <div class="scroll-down" onclick="scrollToGallery()">
+                        <span>Смотреть</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                 </div>
@@ -61,21 +49,32 @@
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- Сюда грузятся товары -->
+    <!-- Основной контейнер товаров -->
+    <main id="gallery-container" class="feed-mode">
         <div id="dynamic-content"></div>
-
     </main>
 
-    <!-- Модалка для покупки -->
+    <!-- Модалка покупки ВК -->
     <div id="vk-modal" class="modal">
         <div class="modal-box">
-            <span class="close-modal">&times;</span>
+            <span class="close-modal" onclick="closeModal('vk-modal')">&times;</span>
             <i class="fab fa-vk vk-icon"></i>
-            <h3>Оформить заказ</h3>
-            <p>Текст с названием работы скопирован.</p>
-            <p style="font-size: 0.9rem; color: #666;">Нажмите кнопку ниже, чтобы открыть диалог ВКонтакте и вставить сообщение.</p>
-            <button id="vk-go-btn">Перейти в диалог</button>
+            <h3>Заказать</h3>
+            <p>Текст заказа скопирован.</p>
+            <button id="vk-go-btn" class="action-btn">Перейти в ВК</button>
+        </div>
+    </div>
+
+    <!-- Модалка Описания (Новое) -->
+    <div id="desc-modal" class="modal">
+        <div class="modal-box large-box">
+            <span class="close-modal" onclick="closeModal('desc-modal')">&times;</span>
+            <h3 id="desc-title">Название</h3>
+            <div class="desc-text" id="desc-text">
+                Тут будет описание...
+            </div>
         </div>
     </div>
 
