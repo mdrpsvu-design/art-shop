@@ -92,26 +92,35 @@
     </div>
 </div>
 
+<!-- Покупка (Telegram) -->
 <div id="tg-modal" class="modal">
     <div class="modal-box">
-        <!-- Обратите внимание: ID модального окна теперь tg-modal -->
         <span class="close-modal" onclick="closeModal('tg-modal')">&times;</span>
-        
-        <!-- Иконка Telegram -->
-        <div class="icon-circle" style="background: #0088cc; color: white;">
+        <div class="icon-circle" style="
+            background: #0088cc; 
+            color: white; 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 15px auto; 
+            font-size: 28px;
+            flex-shrink: 0;
+        ">
+            <!-- Можно использовать fa-telegram-plane (самолетик) или fa-telegram (логотип) -->
             <i class="fab fa-telegram-plane"></i>
         </div>
         
         <h3>Заказ</h3>
         <p>Перейти в Telegram для оформления заказа.</p>
         
-        <!-- ID кнопки теперь tg-go-btn -->
         <button id="tg-go-btn" class="action-btn buy-btn full-width" style="background: #0088cc;">
             Написать в Telegram
         </button>
     </div>
 </div>
-
     <!-- Описание -->
     <div id="desc-modal" class="modal">
         <div class="modal-box large-box">
