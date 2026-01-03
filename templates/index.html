@@ -4,67 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/favicon.png">
-    <title>Art | Персональная выставка</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@200;400&display=swap" rel="stylesheet">
+    <title>Рукоделие & Искусство | Ольга Мартьянова</title>
+    <!-- Шрифты: Marck Script (рукописный) и Alice (для заголовков) -->
+    <link href="https://fonts.googleapis.com/css2?family=Alice&family=Marck+Script&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-    <!-- Меню (фиксированное поверх всего) -->
-    <nav class="fixed-nav">
-        <div class="logo">Art</div>
-        <ul class="nav-links">
-            <li onclick="scrollToSection('hero')">Об авторе</li>
-            <li onclick="filterItems('all')">Вся коллекция</li>
-            <li onclick="filterItems('watercolor')">Акварель</li>
-            <li onclick="filterItems('oil')">Масло</li>
-        </ul>
+    <!-- Верхняя панель управления -->
+    <header class="top-bar">
+        <div class="logo">Handmade <span style="font-family: 'Marck Script'; color: var(--accent);">Soul</span></div>
+        
+        <div class="controls">
+            <!-- Поиск -->
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Поиск работы...">
+                <i class="fas fa-search"></i>
+            </div>
+            
+            <!-- Переключатель вида -->
+            <button class="view-toggle" id="view-toggle-btn" title="Сменить вид">
+                <i class="fas fa-th-large"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Категории (горизонтальный скролл на мобильных) -->
+    <nav class="category-nav">
+        <button class="cat-btn active" data-cat="all">Все</button>
+        <button class="cat-btn" data-cat="doll">Традиционная кукла</button>
+        <button class="cat-btn" data-cat="weaving">Ткачество</button>
+        <button class="cat-btn" data-cat="painting">Роспись</button>
+        <button class="cat-btn" data-cat="scrap">Скрапбукинг</button>
+        <button class="cat-btn" data-cat="decoupage">Декупаж</button>
+        <button class="cat-btn" data-cat="gifts">Подарки</button>
     </nav>
 
-    <!-- Основной контейнер скролла -->
-    <main class="scroll-container" id="main-container">
+    <!-- Основной контейнер (класс меняется JS: feed-mode или grid-mode) -->
+    <main id="gallery-container" class="feed-mode">
         
-        <!-- Секция 1: Об авторе (Всегда первая) -->
+        <!-- Приветствие (Видно только в режиме ленты "Все") -->
         <section class="slide-section hero-section" id="hero">
-            <div class="content-wrapper">
-                <div class="artist-block">
-                    <div class="artist-img-box">
-                        <!-- Заглушка фото мамы -->
-                        <img src="static/mom.jpg" alt="Художник">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Тепло рук,<br>воплощенное в деталях</h1>
+                    <p>Авторские работы Ольги Мартьяновой: от народных традиций до современного декора.</p>
+                    <div class="scroll-down">
+                        <span>Смотреть коллекцию</span>
+                        <i class="fas fa-chevron-down"></i>
                     </div>
-                    <div class="artist-text">
-                        <h1>Ольга Мартьянова</h1>
-                        <p class="role">Преподаватель искусств & Художник</p>
-                        <p class="bio">
-                            "Добро пожаловать в мою цифровую галерею. Здесь каждая работа дышит и рассказывает свою историю. 
-                            Листайте вниз, чтобы увидеть мир моими глазами."
-                        </p>
-                        <div class="scroll-hint">Листайте вниз ↓</div>
-                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="/static/mom.jpg" alt="Мастер">
                 </div>
             </div>
         </section>
 
-        <!-- Сюда JavaScript будет добавлять секции с картинами -->
-        <div id="dynamic-slides"></div>
+        <!-- Сюда грузятся товары -->
+        <div id="dynamic-content"></div>
 
     </main>
 
-    <!-- Окно подтверждения перехода в ВК -->
-    <div id="vk-confirm-modal" class="modal">
-        <div class="modal-content small-modal">
-            <span class="close-btn" onclick="closeVkModal()">&times;</span>
-            <div class="modal-body center-text">
-                <h3>Почти готово!</h3>
-                <p>Текст заказа скопирован в буфер обмена.</p>
-                <p class="sub-text">Сейчас откроется диалог с Ольгой. Просто вставьте текст и отправьте.</p>
-            
-                <button id="go-to-vk-btn" class="buy-button">
-                    Перейти в диалог
-                </button>
-            </div>
+    <!-- Модалка для покупки -->
+    <div id="vk-modal" class="modal">
+        <div class="modal-box">
+            <span class="close-modal">&times;</span>
+            <i class="fab fa-vk vk-icon"></i>
+            <h3>Оформить заказ</h3>
+            <p>Текст с названием работы скопирован.</p>
+            <p style="font-size: 0.9rem; color: #666;">Нажмите кнопку ниже, чтобы открыть диалог ВКонтакте и вставить сообщение.</p>
+            <button id="vk-go-btn">Перейти в диалог</button>
         </div>
     </div>
+
     <script src="/static/script.js"></script>
 </body>
 </html>

@@ -1,232 +1,188 @@
 :root {
-    --font-serif: 'Cormorant Garamond', serif;
-    --font-sans: 'Montserrat', sans-serif;
-    --oil-frame: #5c4033; /* Цвет дерева */
-    --graphic-border: #000;
-    --watercolor-blur: rgba(255, 255, 255, 0.8);
+    --font-head: 'Alice', serif;
+    --font-script: 'Marck Script', cursive;
+    --font-body: 'Montserrat', sans-serif;
+    
+    --bg-color: #faf9f6;
+    --accent: #b07d62;
+    --text: #2c2c2c;
+    
+    /* Цвета категорий */
+    --doll-bg: #fff0f5; --doll-border: #d8bfd8;
+    --weav-bg: #f5f5dc; --weav-border: #8b4513;
+    --paint-bg: #fff8e1; --paint-border: #e65100;
+    --scrap-bg: #e0f7fa; --scrap-border: #006064;
+    --decou-bg: #f3e5f5; --decou-border: #8e24aa;
+    --gifts-bg: #ffebee; --gifts-border: #c62828;
 }
 
 body {
     margin: 0;
-    background-color: #1a1a1a; /* Темный фон, чтобы картины светились */
-    font-family: var(--font-sans);
-    overflow: hidden; /* Скроллим только контейнер */
+    font-family: var(--font-body);
+    background-color: var(--bg-color);
+    color: var(--text);
+    overflow: hidden; /* Скроллит контейнер */
 }
 
-/* Навигация */
-.fixed-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    padding: 1.5rem 3rem;
-    box-sizing: border-box;
-    mix-blend-mode: difference; /* Чтобы текст был виден на любом фоне */
-    color: white;
+/* --- HEADER --- */
+.top-bar {
+    position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+    background: rgba(255,255,255,0.95);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 2rem; box-sizing: border-box; z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
-.logo { font-family: var(--font-serif); font-size: 1.5rem; font-weight: bold; }
-.nav-links li { display: inline-block; margin-left: 20px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+.logo { font-family: var(--font-head); font-size: 1.4rem; letter-spacing: 1px; }
 
-/* Контейнер скролла */
-.scroll-container {
-    height: 100vh;
+.controls { display: flex; gap: 15px; align-items: center; }
+.search-box { position: relative; }
+.search-box input {
+    padding: 8px 35px 8px 15px; border-radius: 20px; border: 1px solid #ddd;
+    font-family: var(--font-body); width: 150px; transition: width 0.3s;
+}
+.search-box input:focus { width: 220px; outline: none; border-color: var(--accent); }
+.search-box i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; }
+
+.view-toggle {
+    background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #333; transition: 0.3s;
+}
+.view-toggle:hover { color: var(--accent); }
+
+/* --- NAV --- */
+.category-nav {
+    position: fixed; top: 60px; left: 0; width: 100%; height: 50px;
+    background: #fff; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    overflow-x: auto; padding: 0 1rem; z-index: 900;
+}
+.cat-btn {
+    background: none; border: none; padding: 5px 15px; border-radius: 20px;
+    cursor: pointer; font-family: var(--font-body); font-size: 0.9rem;
+    white-space: nowrap; transition: 0.3s;
+}
+.cat-btn:hover { background: #f0f0f0; }
+.cat-btn.active { background: var(--text); color: white; }
+
+/* --- MAIN CONTAINER --- */
+#gallery-container {
+    height: 100vh; padding-top: 110px; box-sizing: border-box;
+    transition: all 0.5s ease;
+}
+
+/* Режим FEED (Слайды) */
+.feed-mode {
     overflow-y: scroll;
-    scroll-snap-type: y mandatory; /* Примагничивание */
+    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
 }
-
-/* Общий стиль секции */
-.slide-section {
-    height: 100vh;
-    width: 100vw;
+.feed-mode #dynamic-content { display: block; }
+.feed-mode .slide-section {
+    height: calc(100vh - 110px); width: 100%;
     scroll-snap-align: start;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background-color: #f4f4f4;
-    transition: background 0.5s;
+    display: flex; justify-content: center; align-items: center;
+    position: relative; overflow: hidden;
 }
 
-/* --- Стили для секции "Об авторе" --- */
-.hero-section { background-color: #fffaf0; }
-.artist-block { display: flex; align-items: center; gap: 4rem; max-width: 1200px; padding: 2rem; z-index: 10; }
-.artist-img-box img { width: 400px; height: 500px; object-fit: cover; border-radius: 200px 200px 0 0; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-.artist-text h1 { font-family: var(--font-serif); font-size: 4rem; margin: 0; }
-.artist-text .role { color: #d4a373; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 2rem; }
-.artist-text .bio { font-size: 1.2rem; line-height: 1.6; max-width: 500px; }
-.scroll-hint { margin-top: 3rem; animation: bounce 2s infinite; opacity: 0.5; }
-
-/* --- Стили для картин --- */
-
-/* Контент внутри слайда */
-.art-content {
-    z-index: 10;
-    text-align: center;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 1s ease 0.5s, transform 1s ease 0.5s; /* Появляется с задержкой */
+/* Режим GRID (Сетка) */
+.grid-mode {
+    overflow-y: scroll;
+}
+.grid-mode .hero-section { display: none; } /* Прячем героя в сетке */
+.grid-mode #dynamic-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px; padding: 40px; max-width: 1200px; margin: 0 auto;
 }
 
-/* Когда секция активна (добавляется JS) */
-.slide-section.active .art-content {
-    opacity: 1;
-    transform: scale(1);
+/* --- HERO SECTION --- */
+.hero-section { background: #fffaf0; }
+.hero-content {
+    display: flex; align-items: center; gap: 4rem; max-width: 1000px; padding: 2rem;
 }
+.hero-text h1 { font-family: var(--font-head); font-size: 3.5rem; margin-bottom: 1rem; line-height: 1.1; }
+.hero-image img {
+    width: 350px; height: 450px; object-fit: cover;
+    border-radius: 150px 150px 10px 10px;
+    box-shadow: 10px 10px 0 var(--accent);
+}
+.scroll-down { margin-top: 2rem; color: var(--accent); display: flex; flex-direction: column; align-items: center; animation: float 2s infinite; }
 
-.art-image {
-    max-height: 70vh;
-    max-width: 80vw;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    object-fit: contain;
+/* --- STYLES FOR SLIDES (FEED MODE) --- */
+.art-card {
+    position: relative; text-align: center; z-index: 2;
+    transform: scale(0.9); opacity: 0; transition: 0.8s;
 }
+.slide-section.active .art-card { transform: scale(1); opacity: 1; }
+
+.art-img-wrapper { position: relative; padding: 20px; display: inline-block; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.art-img { max-height: 60vh; max-width: 90vw; object-fit: contain; display: block; }
 
 .art-info {
-    position: absolute;
-    bottom: -60px;
-    background: rgba(255,255,255,0.9);
-    padding: 1.5rem 3rem;
-    border-radius: 50px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-}
-
-.art-title { font-family: var(--font-serif); font-size: 1.5rem; margin: 0; }
-.art-price { font-weight: bold; color: #333; }
-.buy-btn-small {
-    background: #000; color: #fff; border: none; padding: 10px 20px; 
-    border-radius: 20px; cursor: pointer; transition: 0.3s;
-}
-.buy-btn-small:hover { background: #d4a373; }
-
-
-/* --- ДЕКОРАЦИИ (РАМКИ) --- */
-
-/* Базовые стили для декоративных элементов */
-.deco {
-    position: absolute;
-    transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Плавный выезд */
-    z-index: 5;
-}
-
-/* 1. Стиль МАСЛО (Тяжелая рама) */
-.slide-section.style-oil .deco { background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png'); background-color: var(--oil-frame); }
-.slide-section.style-oil .deco-top { top: 0; left: 0; width: 100%; height: 60px; transform: translateY(-100%); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-.slide-section.style-oil .deco-bottom { bottom: 0; left: 0; width: 100%; height: 60px; transform: translateY(100%); box-shadow: 0 -10px 20px rgba(0,0,0,0.3); }
-.slide-section.style-oil .deco-left { top: 0; left: 0; width: 60px; height: 100%; transform: translateX(-100%); }
-.slide-section.style-oil .deco-right { top: 0; right: 0; width: 60px; height: 100%; transform: translateX(100%); }
-
-/* Активация Масла */
-.slide-section.style-oil.active .deco { transform: translate(0, 0); }
-
-
-/* 2. Стиль ГРАФИКА (Тонкие линии) */
-.slide-section.style-graphic { background-color: #fff; }
-.slide-section.style-graphic .deco { background-color: var(--graphic-border); }
-.slide-section.style-graphic .deco-top { top: 40px; left: 40px; right: 40px; height: 2px; transform: scaleX(0); transition-delay: 0.2s; }
-.slide-section.style-graphic .deco-bottom { bottom: 40px; left: 40px; right: 40px; height: 2px; transform: scaleX(0); transition-delay: 0.2s; }
-.slide-section.style-graphic .deco-left { top: 40px; bottom: 40px; left: 40px; width: 2px; transform: scaleY(0); }
-.slide-section.style-graphic .deco-right { top: 40px; bottom: 40px; right: 40px; width: 2px; transform: scaleY(0); }
-
-/* Активация Графики */
-.slide-section.style-graphic.active .deco { transform: scale(1); }
-
-
-/* 3. Стиль АКВАРЕЛЬ (Размытые виньетки) */
-.slide-section.style-watercolor { background-color: #f0f8ff; }
-.slide-section.style-watercolor .deco {
-    width: 300px; height: 300px; border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0;
-    transition: opacity 1.5s ease, transform 1.5s ease;
-}
-.slide-section.style-watercolor .deco-top { top: -50px; left: -50px; background: #bde0fe; transform: translate(-50px, -50px); }
-.slide-section.style-watercolor .deco-bottom { bottom: -50px; right: -50px; background: #ffc8dd; transform: translate(50px, 50px); }
-.slide-section.style-watercolor .deco-left { display: none; } /* Меньше элементов для легкости */
-.slide-section.style-watercolor .deco-right { display: none; }
-
-/* Активация Акварели */
-.slide-section.style-watercolor.active .deco { opacity: 0.6; transform: translate(0, 0); }
-
-
-@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
-@media (max-width: 768px) {
-    .artist-block { flex-direction: column; text-align: center; }
-    .artist-img-box img { width: 250px; height: 300px; }
-    .artist-text h1 { font-size: 2.5rem; }
-    .art-image { max-width: 95vw; }
-    .art-info { bottom: 20px; flex-direction: column; gap: 0.5rem; padding: 1rem; width: 80%; }
-    .fixed-nav { padding: 1rem; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
-    .nav-links { display: none; } /* Скрыть меню на мобилках или сделать бургер */
-}
-
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 999999; /* !!! ОЧЕНЬ БОЛЬШОЕ ЧИСЛО !!! */
-    left: 0; top: 0; 
-    width: 100%; height: 100%; 
-    background-color: rgba(0,0,0,0.8);
+    margin-top: 20px; background: rgba(255,255,255,0.9); padding: 15px 30px;
+    border-radius: 30px; display: inline-flex; align-items: center; gap: 20px;
     backdrop-filter: blur(5px);
 }
-
-.small-modal {
-    position: relative;
-    background-color: #fff;
-    margin: 15% auto; /* Отступ сверху */
-    padding: 3rem;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-    animation: zoomIn 0.3s ease;
-    display: flex; /* Важно для центровки */
-    flex-direction: column;
-    z-index: 1000000; /* Тоже поднимаем */
+.art-title { font-family: var(--font-head); font-size: 1.5rem; margin: 0; }
+.buy-btn {
+    background: var(--text); color: white; border: none; padding: 10px 25px;
+    border-radius: 20px; cursor: pointer; transition: 0.3s;
 }
+.buy-btn:hover { background: var(--accent); transform: translateY(-2px); }
 
-.center-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+/* --- STYLES FOR GRID ITEMS --- */
+.grid-item {
+    background: white; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s;
+    display: flex; flex-direction: column;
 }
+.grid-item:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.grid-img { width: 100%; height: 250px; object-fit: cover; }
+.grid-details { padding: 15px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
 
-.center-text h3 {
-    font-family: var(--font-serif);
-    font-size: 2rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
+/* --- SPECIFIC CATEGORY STYLES (BACKGROUNDS & DECOR) --- */
 
-.sub-text {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 2rem;
-}
+/* 1. DOLL (Кукла) - Lace & Soft */
+.theme-doll { background: var(--doll-bg); background-image: radial-gradient(#e6e6fa 1px, transparent 1px); background-size: 20px 20px; }
+.theme-doll .art-img-wrapper { border: 10px solid white; outline: 2px dashed var(--doll-border); border-radius: 10px; }
 
-/* Кнопка */
-#go-to-vk-btn {
-    width: 100%;
-    font-size: 1.1rem;
-    font-weight: bold;
-    padding: 15px;
-    background: var(--accent-color); /* Используем акцентный цвет */
-    color: white;
-}
+/* 2. WEAVING (Ткачество) - Canvas texture */
+.theme-weaving { background: var(--weav-bg); background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20h20v20H20V20zM0 0h20v20H0V0z' fill='%23d2b48c' fill-opacity='0.1'/%3E%3C/svg%3E"); }
+.theme-weaving .art-img-wrapper { box-shadow: 10px 10px 0 var(--weav-border); }
 
-#go-to-vk-btn:hover {
-    filter: brightness(1.1);
+/* 3. PAINTING (Роспись) - Wood/Khokhloma hint */
+.theme-painting { background: var(--paint-bg); }
+.theme-painting .art-img-wrapper { border: 8px solid var(--paint-border); border-radius: 50% 50% 0 0 / 10% 10% 0 0; }
+
+/* 4. SCRAPBOOKING - Layers & Shadows */
+.theme-scrap { background: var(--scrap-bg); }
+.theme-scrap .art-img-wrapper { transform: rotate(-2deg); border: 5px solid white; box-shadow: 5px 5px 15px rgba(0,0,0,0.2); }
+.theme-scrap .art-card::before { content: ''; position: absolute; top: -20px; left: 50%; width: 100px; height: 30px; background: rgba(255,255,255,0.5); transform: translateX(-50%) rotate(2deg); z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,0.1); } /* Tape effect */
+
+/* 5. DECOUPAGE - Vintage Crackle */
+.theme-decoupage { background: var(--decou-bg); }
+.theme-decoupage .art-img-wrapper { border-radius: 20px; border: 1px solid var(--decou-border); padding: 10px; }
+
+/* 6. GIFTS - Festive */
+.theme-gifts { background: var(--gifts-bg); }
+.theme-gifts .art-img-wrapper { border: 2px solid var(--gifts-border); position: relative; }
+.theme-gifts .art-img-wrapper::after { content: '★'; position: absolute; top: -15px; right: -15px; font-size: 30px; color: var(--gifts-border); }
+
+/* --- MODAL --- */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+.modal-box { background: white; width: 90%; max-width: 400px; margin: 15% auto; padding: 30px; border-radius: 15px; text-align: center; position: relative; animation: zoom 0.3s; }
+.vk-icon { font-size: 3rem; color: #0077FF; margin-bottom: 15px; }
+.close-modal { position: absolute; top: 10px; right: 20px; font-size: 2rem; cursor: pointer; }
+#vk-go-btn { background: #0077FF; color: white; border: none; padding: 12px 30px; border-radius: 25px; margin-top: 15px; cursor: pointer; font-weight: bold; }
+
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
+@keyframes zoom { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+@media (max-width: 768px) {
+    .hero-content { flex-direction: column-reverse; text-align: center; padding-top: 2rem; }
+    .hero-image img { width: 250px; height: 300px; }
+    .hero-text h1 { font-size: 2.2rem; }
+    .grid-mode #dynamic-content { grid-template-columns: 1fr; }
+    .top-bar { padding: 0 1rem; }
+    .search-box input { width: 100px; }
+    .search-box input:focus { width: 160px; }
 }
