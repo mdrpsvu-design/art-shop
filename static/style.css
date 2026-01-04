@@ -21,10 +21,21 @@ body {
 
 /* --- HEADER --- */
 .top-bar {
-    position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
-    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
-    z-index: 1000; display: flex; justify-content: space-between; align-items: center;
-    padding: 0 2rem; box-sizing: border-box; border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    width: calc(100% - 6px); 
+    
+    height: var(--header-height);
+    background: rgba(255, 255, 255, 0.9); 
+    backdrop-filter: blur(10px);
+    z-index: 1000; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 2rem; 
+    box-sizing: border-box; 
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .logo { 
@@ -42,7 +53,6 @@ body {
 }
 .contact-trigger:hover { color: var(--accent); }
 
-/* --- ИСПРАВЛЕНИЕ 1: Ровная лупа --- */
 .search-box { 
     position: relative; /* База для позиционирования иконки */
     display: flex; align-items: center;
@@ -60,13 +70,22 @@ body {
     color: #ccc; pointer-events: none; margin: 0; 
 }
 
-/* --- NAV (ИСПРАВЛЕНИЕ 2: Стиль меню) --- */
 .category-nav {
-    position: fixed; top: var(--header-height); left: 0; width: 100%; height: var(--nav-height);
-    background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
-    z-index: 900; border-bottom: 1px solid rgba(0,0,0,0.03);
-    display: flex; justify-content: center;
+    position: fixed; 
+    top: var(--header-height); 
+    left: 0; 
+    /* То же самое для меню */
+    width: calc(100% - 6px);
+    
+    height: var(--nav-height);
+    background: rgba(255,255,255,0.8); 
+    backdrop-filter: blur(10px);
+    z-index: 900; 
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    display: flex; 
+    justify-content: center;
 }
+
 .nav-inner { display: flex; gap: 20px; overflow-x: auto; padding: 0 20px; align-items: center; scrollbar-width: none; }
 .nav-inner::-webkit-scrollbar { display: none; }
 
@@ -132,7 +151,33 @@ body {
 .hero-img { width: 350px; height: 480px; object-fit: cover; box-shadow: 20px 20px 0 rgba(0,0,0,0.05); }
 
 .scroll-hint { margin-top: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--accent); }
-.scroll-hint .line { height: 1px; width: 40px; background: var(--accent); }
+.scroll-hint .line {
+    height: 1px;
+    width: 40px; /* Начальная ширина */
+    background: var(--accent);
+    
+    /* Запуск анимации: 2 секунды, бесконечно, плавно */
+    animation: stretchLine 2s infinite ease-in-out;
+    
+    /* Добавляем transition на случай hover эффекта */
+    transition: width 0.3s ease;
+}
+
+.scroll-hint:hover .line {
+    animation-play-state: paused; /* Остановить пульсацию */
+    width: 90px; /* Сделать еще длиннее */
+}
+
+.scroll-hint span {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: letter-spacing 0.3s ease;
+}
+
+.scroll-hint:hover span {
+    letter-spacing: 4px; /* Буквы разъезжаются при наведении */
+}
 
 /* --- PRODUCT CARD (DESKTOP) --- */
 .art-left-col { flex: 1.2; display: flex; justify-content: center; position: relative; }
@@ -178,6 +223,12 @@ body {
     animation: popUp 0.3s ease-out;
 }
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+@keyframes stretchLine {
+    0% { width: 40px; opacity: 0.7; }
+    50% { width: 80px; opacity: 1; } /* Растягивается до 80px */
+    100% { width: 40px; opacity: 0.7; }
+}
 
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: #bbb; line-height: 1; }
 .close-modal:hover { color: var(--accent); }
@@ -231,7 +282,6 @@ body {
     .art-price { font-size: 1.4rem; margin-bottom: 15px; }
     .art-cat { margin-bottom: 5px; }
     
-    /* ИСПРАВЛЕНИЕ 3: Кнопки строго одинаковые */
     .btn-group { width: 100%; gap: 10px; }
     .action-btn { 
         flex: 1; /* Растягиваться равномерно */
