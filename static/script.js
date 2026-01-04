@@ -117,23 +117,39 @@ function renderItems() {
     const container = document.getElementById('dynamic-content');
     container.innerHTML = '';
     
+    // Если товаров нет
     if (itemsData.length === 0) {
-        container.innerHTML = '<div style="height:50vh; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:1.5rem;">Нет работ.</div>';
+        container.innerHTML = '<div style="height:50vh; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:1.5rem;">Нет работ в этой категории.</div>';
         return;
     }
 
+    // Рендерим товары
     itemsData.forEach(item => {
         const el = document.createElement('section');
         el.className = `slide-section theme-${item.category}`;
-        // Добавляем data-cat для шпиона
         el.dataset.cat = item.category; 
         el.innerHTML = getSlideHTML(item);
         container.appendChild(el);
         
-        // Подключаем наблюдателей
         animationObserver.observe(el);
         spyObserver.observe(el);
     });
+
+    // --- ДОБАВЛЯЕМ ФИНАЛЬНЫЙ СЛАЙД (FOOTER) ---
+    const footerEl = document.createElement('section');
+    footerEl.className = 'slide-section footer-section';
+    footerEl.innerHTML = `
+        <div class="footer-content">
+            <div class="end-icon"><i class="fas fa-seedling"></i></div>
+            <div class="footer-text">Вы просмотрели всю коллекцию</div>
+            <button class="back-to-top-btn" onclick="resetToHero()">В начало</button>
+            <div style="margin-top: 30px; font-size: 0.9rem; color: #888;">
+                &copy; 2026 Handmade Soul
+            </div>
+        </div>
+    `;
+    container.appendChild(footerEl);
+    animationObserver.observe(footerEl); // Чтобы сработала анимация появления
 }
 
 function getSlideHTML(item) {

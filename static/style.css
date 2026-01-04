@@ -254,3 +254,79 @@ body {
     }
     .desc-text { max-height: none; }
 }
+
+/* --- CUSTOM SCROLLBAR (Дизайн скроллбара) --- */
+
+/* Для Firefox */
+.scroll-snap-container {
+    scrollbar-width: thin; /* Тонкий скроллбар */
+    scrollbar-color: var(--accent) transparent; /* Ползунок и фон */
+}
+
+/* Для Chrome, Safari, Edge */
+.scroll-snap-container::-webkit-scrollbar {
+    width: 6px; /* Ширина всего 6px */
+}
+
+.scroll-snap-container::-webkit-scrollbar-track {
+    background: transparent; /* Фон прозрачный */
+}
+
+.scroll-snap-container::-webkit-scrollbar-thumb {
+    background-color: var(--accent); /* Цвет ползунка (ваш коричневый) */
+    border-radius: 20px; /* Закругление */
+    border: 2px solid transparent; /* Отступ внутри, чтобы казался тоньше */
+    background-clip: content-box;
+}
+
+.scroll-snap-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text); /* Темнеет при наведении */
+}
+
+/* --- FOOTER SLIDE (Секция конца списка) --- */
+.footer-section {
+    background-color: #f7f5f0; /* Чуть темнее основного фона */
+    text-align: center;
+    flex-direction: column;
+}
+
+.footer-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.8s ease;
+}
+
+.footer-section.visible .footer-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.end-icon {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+.footer-text {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: var(--text);
+}
+
+.back-to-top-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 15px 40px;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.back-to-top-btn:hover {
+    background: var(--accent);
+    color: #fff;
+}
