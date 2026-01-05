@@ -156,15 +156,58 @@ body {
 
 /* --- HERO --- */
 .hero-section { background: linear-gradient(to bottom, #fffcf5, #fff); }
-.hero-text { flex: 1; opacity: 0; transform: translateY(30px); transition: 1s ease 0.5s; }
+.hero-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Текст слева, фото справа */
+    width: 100%;
+    max-width: 1300px; /* Увеличили ширину контейнера */
+    padding: 0 50px; /* Отступы по краям */
+    gap: 40px; /* Уменьшили дырку между текстом и фото */
+}
+.hero-text { 
+    flex: 1.5; 
+    opacity: 0; 
+    transform: translateY(30px); 
+    transition: 1s ease 0.5s; 
+    /* Выравнивание текста слева */
+    text-align: left; 
+    padding-right: 20px;
+}
 .hero-text.visible { opacity: 1; transform: translateY(0); }
 
-.hero-text h1 { font-size: 4rem; margin: 0 0 10px; font-weight: 300; line-height: 1; font-style: italic; }
-.subtitle { font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 30px; }
-.separator { width: 50px; height: 1px; background: var(--accent); margin-bottom: 30px; }
-.bio { font-size: 1.1rem; line-height: 1.6; color: #555; max-width: 400px; }
+.hero-text h1 { font-size: 4.5rem; margin: 0 0 15px; font-weight: 300; line-height: 1; font-style: italic; }
+.subtitle { font-size: 1.1rem; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 30px; }
+.separator { width: 60px; height: 1px; background: var(--accent); margin-bottom: 30px; }
+.bio { font-size: 1.2rem; line-height: 1.6; color: #555; max-width: 550px; }
 
-.hero-image-box { flex: 1; opacity: 0; transition: 1.5s ease; }
+.hero-image-box { 
+    flex: 1; 
+    opacity: 0; 
+    transition: 1.5s ease;
+    position: relative; /* Важно для наложения картинок */
+    height: 550px; /* Фиксируем высоту для слайдера */
+    display: flex;
+    justify-content: center; /* Центрируем фото внутри правой части */
+    overflow: hidden; /* Обрезаем лишнее, если фото разного размера */
+}
+.hero-slide-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Заполняет блок, обрезая края */
+    object-position: top center;
+    opacity: 0; /* Скрыто по умолчанию */
+    transition: opacity 1.5s ease-in-out; /* Плавное затухание 1.5 сек */
+    box-shadow: 20px 20px 0 rgba(0,0,0,0.05); /* Тень как была раньше */
+    border-radius: 4px;
+}
+.hero-slide-img.active {
+    opacity: 1;
+    z-index: 2;
+}
 .hero-image-box.visible { opacity: 1; }
 .hero-img { width: 350px; height: 480px; object-fit: cover; box-shadow: 20px 20px 0 rgba(0,0,0,0.05); }
 

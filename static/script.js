@@ -6,6 +6,43 @@ let isLoading = false;
 let hasMoreItems = true;
 let searchDebounceStr = '';
 
+/* --- КОНФИГУРАЦИЯ СЛАЙД-ШОУ --- */
+// Просто добавляйте сюда новые названия файлов, которые лежат в папке static
+const HERO_IMAGES = [
+    "mom.jpg",
+    "mom1.jpg",
+    "mom2.jpg"
+];
+
+function initHeroSlideshow() {
+    const container = document.getElementById('hero-slideshow-container');
+    if (!container) return;
+
+    // 1. Создаем HTML для картинок
+    container.innerHTML = HERO_IMAGES.map((imgName, index) => `
+        <img src="/static/${imgName}" 
+             class="hero-slide-img ${index === 0 ? 'active' : ''}" 
+             alt="Мастер ${index + 1}">
+    `).join('');
+
+    // 2. Запускаем интервал смены
+    let currentIndex = 0;
+    const slides = container.querySelectorAll('.hero-slide-img');
+    
+    if (slides.length > 1) {
+        setInterval(() => {
+            // Убираем класс active у текущей
+            slides[currentIndex].classList.remove('active');
+            
+            // Вычисляем следующий индекс
+            currentIndex = (currentIndex + 1) % slides.length;
+            
+            // Добавляем класс active следующей
+            slides[currentIndex].classList.add('active');
+        }, 5000); // Смена каждые 5 секунд (5000 мс)
+    }
+}
+
 // Observer'ы
 const animationObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -74,6 +111,8 @@ async function initApp() {
         resetGalleryState();
         loadNextPage();
         setupObservers();
+
+        initHeroSlideshow(); 
 
     } catch (e) {
         console.error("Ошибка инициализации:", e);
