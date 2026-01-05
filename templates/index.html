@@ -13,7 +13,6 @@
 
     <!-- Шапка -->
     <header class="top-bar">
-        <!-- ИЗМЕНЕНИЕ: Добавлены два span для управления видимостью логотипа -->
         <div class="logo" onclick="resetToHero()">
             <span class="logo-full">Handmade Soul</span>
             <span class="logo-short">HS</span>
@@ -87,7 +86,8 @@
                 <i class="fab fa-telegram"></i> <span>Telegram</span>
             </a>
 
-            <div class="contact-row">
+            <!-- ИЗМЕНЕНИЕ: Добавлен onclick для копирования -->
+            <div class="contact-row" onclick="copyEmail('olyamartyanova.martyanova@yandex.ru')" style="cursor: pointer;" title="Нажмите, чтобы скопировать">
                 <i class="fas fa-envelope"></i> <span>olyamartyanova.martyanova@yandex.ru</span>
             </div>
             
@@ -112,7 +112,6 @@
             font-size: 28px;
             flex-shrink: 0;
         ">
-            <!-- Можно использовать fa-telegram-plane (самолетик) или fa-telegram (логотип) -->
             <i class="fab fa-telegram-plane"></i>
         </div>
         
@@ -133,6 +132,9 @@
             <div class="desc-text" id="desc-text"></div>
         </div>
     </div>
+
+    <!-- ИЗМЕНЕНИЕ: Уведомление о копировании -->
+    <div id="copy-toast">Email скопирован!</div>
 
     <script src="/static/script.js"></script>
 </body>

@@ -15,17 +15,15 @@ const animationObserver = new IntersectionObserver((entries) => {
 
 // Observer для подсветки меню категорий
 const spyObserver = new IntersectionObserver((entries) => {
-    // ВАЖНО: Разрешаем работать, если мы в режиме "все", чтобы переключаться обратно на "Коллекция" при скролле вверх
     if (currentCategory !== 'all') return;
     
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const cat = entry.target.dataset.cat;
-            // Если секция имеет категорию, подсвечиваем её в меню
             if (cat) highlightMenu(cat);
         }
     });
-}, { threshold: 0.5 }); // Сработает, когда 50% блока видно
+}, { threshold: 0.5 }); 
 
 // Observer для бесконечной прокрутки (следит за "дном" списка)
 const sentinelObserver = new IntersectionObserver((entries) => {
@@ -44,12 +42,9 @@ function highlightMenu(cat) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Первая инициализация
     resetGalleryState();
     loadNextPage();
     
-    // --- ИСПРАВЛЕНИЕ: Начинаем следить за Hero секцией ---
-    // Теперь при скролле на самый верх меню само переключится на "Коллекция"
     const heroSection = document.getElementById('hero-section');
     if (heroSection) {
         spyObserver.observe(heroSection);
@@ -82,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.classList.add('active');
             
             currentCategory = e.target.dataset.cat;
-            searchDebounceStr = ''; // Сброс поиска при смене категории
+            searchDebounceStr = ''; 
             document.getElementById('search-input').value = '';
 
             document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
@@ -94,26 +89,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function resetToHero() {
-    // 1. Очищаем поле поиска визуально
     document.getElementById('search-input').value = '';
 
     const needReload = (currentCategory !== 'all') || (searchDebounceStr !== '');
 
-    // 3. Сбрасываем внутренние переменные в дефолт
     currentCategory = 'all';
     searchDebounceStr = '';
 
-    // 4. Обновляем кнопки меню (подсвечиваем "Коллекция")
-    // (Это дублируется observer'ом, но оставим для мгновенной реакции при клике)
     highlightMenu('all');
 
-    // 5. Гарантируем, что Hero-секция видима
     document.getElementById('hero-section').style.display = 'flex';
 
-    // 6. Скроллим наверх
     document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 7. Перезагрузка если нужно
     if (needReload) {
         resetGalleryState();
         loadNextPage();
@@ -124,7 +112,6 @@ function scrollToNext() {
     document.getElementById('main-scroller').scrollBy({ top: window.innerHeight, behavior: 'smooth' });
 }
 
-// Сброс состояния перед новой фильтрацией/категорией
 function resetGalleryState() {
     currentPage = 1;
     hasMoreItems = true;
@@ -132,13 +119,11 @@ function resetGalleryState() {
     isLoading = false;
     
     const container = document.getElementById('dynamic-content');
-    container.innerHTML = ''; // Очищаем старые товары
+    container.innerHTML = ''; 
     
-    // Удаляем старый сентинел
     const oldSentinel = document.getElementById('scroll-sentinel');
     if (oldSentinel) oldSentinel.remove();
     
-    // Логика Hero секции
     const hero = document.getElementById('hero-section');
     if (searchDebounceStr) hero.style.display = 'none';
     else if (currentCategory === 'all') hero.style.display = 'flex';
@@ -178,7 +163,6 @@ async function loadNextPage() {
                 renderFooter(container); 
             }
         } else {
-            // Временно отключаем прилипание
             mainScroller.style.scrollSnapType = 'none';
 
             allLoadedItems = [...allLoadedItems, ...newItems];
@@ -291,4 +275,17 @@ window.openDesc = function(id) {
     document.getElementById('desc-title').innerText = item.title;
     document.getElementById('desc-text').innerText = item.description;
     openModal('desc-modal');
+};
+
+/* --- ИЗМЕНЕНИЕ: Функция копирования email --- */
+window.copyEmail = function(email) {
+    navigator.clipboard.writeText(email).then(() => {
+        const toast = document.getElementById('copy-toast');
+        toast.classList.add('visible');
+        setTimeout(() => {
+            toast.classList.remove('visible');
+        }, 2500); // Сообщение висит 2.5 секунды
+    }).catch(err => {
+        console.error('Ошибка копирования: ', err);
+    });
 };
