@@ -31,7 +31,6 @@ const sentinelObserver = new IntersectionObserver((entries) => {
     });
 }, { rootMargin: "200px" });
 
-// --- НОВАЯ ФУНКЦИЯ ЗАГРУЗКИ МЕНЮ ---
 async function initApp() {
     try {
         // 1. Загружаем категории
@@ -39,30 +38,39 @@ async function initApp() {
         const categories = await res.json();
         
         const navContainer = document.getElementById('nav-container');
-        navContainer.innerHTML = ''; // Очистка на всякий случай
+        navContainer.innerHTML = ''; 
 
-        // Добавляем кнопку "Коллекция" (Все) вручную первой
-        const allBtn = document.createElement('button');
-        allBtn.className = 'cat-btn active';
-        allBtn.dataset.cat = 'all';
-        allBtn.innerText = 'Коллекция';
-        navContainer.appendChild(allBtn);
-
-        // Добавляем остальные из базы
-        categories.forEach(cat => {
+        // Функция для создания кнопки с анимацией
+        const createAnimatedBtn = (slug, name, index) => {
             const btn = document.createElement('button');
             btn.className = 'cat-btn';
-            btn.dataset.cat = cat.slug;
-            btn.innerText = cat.name;
+            if (slug === 'all') btn.classList.add('active'); // "Коллекция" активна сразу
+            btn.dataset.cat = slug;
+            btn.innerText = name;
+            
+            // --- МАГИЯ АНИМАЦИИ ---
+            // forwards сохраняет состояние (opacity: 1) после завершения
+            btn.style.animation = `navItemReveal 0.5s ease-out forwards`;
+            // Каждая следующая кнопка появляется через 100мс после предыдущей
+            btn.style.animationDelay = `${index * 120}ms`; // 120ms задержка
+            
             navContainer.appendChild(btn);
+        };
+
+        // 2. Добавляем кнопку "Коллекция" (индекс 0)
+        createAnimatedBtn('all', 'Коллекция', 0);
+
+        // 3. Добавляем остальные из базы (индекс + 1)
+        categories.forEach((cat, idx) => {
+            createAnimatedBtn(cat.slug, cat.name, idx + 1);
         });
 
-        // 2. Вешаем слушатели событий на кнопки (используем делегирование или forEach)
+        // 4. Вешаем слушатели событий
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.addEventListener('click', handleCategoryClick);
         });
 
-        // 3. Загружаем контент
+        // 5. Загружаем контент
         resetGalleryState();
         loadNextPage();
         setupObservers();

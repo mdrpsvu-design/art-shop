@@ -89,7 +89,18 @@ body {
     display: flex; justify-content: center;
 }
 
-.nav-inner { display: flex; gap: 20px; overflow-x: auto; padding: 0 20px; align-items: center; scrollbar-width: none; }
+.nav-inner { 
+    display: flex; 
+    gap: 20px; 
+    overflow-x: auto; 
+    padding: 0 20px; 
+    align-items: center; 
+    scrollbar-width: none;
+    /* Гарантируем центровку */
+    justify-content: center; 
+    /* Растягиваем на всю ширину, чтобы justify-content работал корректно */
+    width: 100%; 
+}
 .nav-inner::-webkit-scrollbar { display: none; }
 
 .cat-btn {
@@ -97,6 +108,11 @@ body {
     font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
     color: #888; cursor: pointer; transition: color 0.3s; 
     position: relative; padding-bottom: 5px; white-space: nowrap;
+    
+    /* СКРЫВАЕМ кнопку по умолчанию */
+    opacity: 0; 
+    /* Сдвигаем немного влево, чтобы она "выезжала" от предыдущей */
+    transform: translateX(-15px);
 }
 
 .cat-btn::after {
@@ -298,56 +314,70 @@ body {
 
 /* --- MOBILE ADAPTATION --- */
 @media (max-width: 900px) {
-    :root { --top-offset: 80px; } /* Уменьшили отступ (было 100px) */
+    :root { --top-offset: 80px; } 
     
     .top-bar, .category-nav {
         width: 100%;
     }
 
     .logo { font-size: 1.4rem; letter-spacing: 1px; }
-    
     .logo-full { display: none; }
     .logo-short { display: inline; }
-    
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* --- ОБЩИЙ КОНТЕЙНЕР СЛАЙДА --- */
+    /* --- ОБЩИЙ КОНТЕЙНЕР --- */
     .content-wrapper {
         flex-direction: column;
-        /* ИЗМЕНЕНИЕ: center вместо flex-start выравнивает товар по вертикали по центру экрана */
-        justify-content: center; 
+        justify-content: center; /* Центрирует товары */
         padding: 0 20px;
-        gap: 15px;
+        gap: 10px; /* Уменьшили общий зазор */
         text-align: center;
-        height: 100%; /* Гарантируем высоту для центрирования */
+        height: 100%; 
     }
 
-    /* --- ГЛАВНЫЙ ЭКРАН (HERO) --- */
+    /* --- ГЛАВНЫЙ ЭКРАН (HERO) - Исправление --- */
     .hero-wrapper { 
-        justify-content: flex-start; /* Главную оставляем чуть выше центра */
-        padding-top: 100px; /* Уменьшили отступ (было 130px) */
+        justify-content: flex-start; /* Прижимаем к верху */
+        padding-top: 80px; /* Отступ от шапки */
+        gap: 5px; /* Минимальный зазор между фото и текстом */
     } 
     
-    .hero-image-box { margin-bottom: 10px; order: -1; /* Картинка может быть над текстом для экономии места, или уберите order если хотите как было */ }
+    .hero-image-box { 
+        margin-bottom: 5px; 
+        order: -1; /* Картинка сверху */
+        flex: 0 0 auto; /* Не сжимать и не растягивать блок фото */
+    }
     
     .hero-img { 
         width: auto;
-        max-width: 80%; /* Не даем картинке распирать экран */
+        max-width: 80%;
         height: auto;
-        max-height: 35vh; /* ИЗМЕНЕНИЕ: Высота картинки зависит от высоты экрана (макс 35%) */
+        max-height: 30vh; /* УМЕНЬШИЛИ фото до 30% высоты экрана */
         object-fit: contain;
     }
     
-    .hero-text h1 { font-size: 2.2rem; margin-bottom: 5px; }
-    .subtitle { margin-bottom: 15px; font-size: 0.9rem; }
-    .separator { margin-bottom: 15px; }
-    .bio { font-size: 1rem; }
+    .hero-text {
+        flex: 0 0 auto; /* Текст занимает ровно столько места, сколько нужно */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Уплотняем текст, чтобы всё влезло */
+    .hero-text h1 { font-size: 2rem; margin: 0 0 5px 0; line-height: 1.1; }
+    .subtitle { margin-bottom: 10px; font-size: 0.85rem; margin-top: 0; }
+    .separator { margin-bottom: 10px; width: 40px; } /* Чуть меньше отступ */
+    .bio { font-size: 0.95rem; margin-bottom: 5px; line-height: 1.4; }
     
-    /* --- КАРТОЧКА ТОВАРА --- */
+    /* Самое важное: поднимаем кнопку "Смотреть" */
+    .scroll-hint { 
+        margin-top: 15px; /* БЫЛО 50px -> СТАЛО 15px */
+    }
+
+    /* --- КАРТОЧКА ТОВАРА (оставляем как было, там всё хорошо) --- */
     .art-left-col {
         flex: 0 0 auto; 
-        /* ИЗМЕНЕНИЕ: Убрали жесткую высоту 45vh. Теперь высота подстраивается под картинку */
         height: auto; 
         width: 100%;
         display: flex;
@@ -357,7 +387,7 @@ body {
     }
     
     .art-right-col {
-        flex: 0 0 auto; /* Не растягиваемся, занимаем столько места, сколько нужно тексту */
+        flex: 0 0 auto; 
         justify-content: flex-start; 
         transform: none; opacity: 1; 
         width: 100%;
@@ -370,11 +400,9 @@ body {
         display: flex; 
         align-items: center; 
         justify-content: center;
-        position: relative;
     }
 
     .art-img { 
-        /* ИЗМЕНЕНИЕ: Картинка занимает максимум 45% высоты экрана, чтобы осталось место для текста и кнопок */
         max-height: 45vh; 
         max-width: 100%; 
         width: auto;
@@ -404,7 +432,6 @@ body {
         max-height: 80vh; 
         overflow-y: auto;
     }
-    .desc-text { max-height: none; }
 }
 
 /* --- CUSTOM SCROLLBAR --- */
@@ -503,4 +530,15 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@keyframes navItemReveal {
+    0% {
+        opacity: 0;
+        transform: translateX(-15px); /* Старт: чуть левее и прозрачная */
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0); /* Финиш: на месте и видимая */
+    }
 }
