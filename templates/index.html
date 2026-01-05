@@ -13,8 +13,11 @@
 
     <!-- Шапка -->
     <header class="top-bar">
-        <!-- Клик по логотипу возвращает к началу (Пункт 1) -->
-        <div class="logo" onclick="resetToHero()">Handmade Soul</div>
+        <!-- ИЗМЕНЕНИЕ: Добавлены два span для управления видимостью логотипа -->
+        <div class="logo" onclick="resetToHero()">
+            <span class="logo-full">Handmade Soul</span>
+            <span class="logo-short">HS</span>
+        </div>
         
         <div class="header-right">
             <button class="contact-trigger" onclick="openModal('contacts-modal')">Контакты</button>
@@ -42,7 +45,6 @@
     <div class="scroll-snap-container" id="main-scroller">
         
         <!-- Hero Section -->
-        <!-- ДОБАВЛЕН data-cat="all", чтобы наблюдатель знал, что это "Коллекция" -->
         <section class="slide-section hero-section" id="hero-section" data-cat="all">
             <div class="content-wrapper hero-wrapper">
                 <div class="hero-text reveal-element">
@@ -110,6 +112,7 @@
             font-size: 28px;
             flex-shrink: 0;
         ">
+            <!-- Можно использовать fa-telegram-plane (самолетик) или fa-telegram (логотип) -->
             <i class="fab fa-telegram-plane"></i>
         </div>
         

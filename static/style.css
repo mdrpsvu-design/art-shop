@@ -37,6 +37,11 @@ body {
     cursor: pointer;
 }
 
+/* ИЗМЕНЕНИЕ: По умолчанию короткая версия скрыта */
+.logo-short {
+    display: none;
+}
+
 .header-right { display: flex; align-items: center; gap: 20px; }
 
 .contact-trigger {
@@ -237,7 +242,12 @@ body {
         width: 100%;
     }
 
-    .logo { font-size: 1.4rem; }
+    .logo { font-size: 1.4rem; letter-spacing: 1px; }
+    
+    /* ИЗМЕНЕНИЕ: Прячем полную версию и показываем короткую на мобильных */
+    .logo-full { display: none; }
+    .logo-short { display: inline; }
+    
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
