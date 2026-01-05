@@ -149,8 +149,8 @@ async function loadNextPage() {
     isLoading = true;
 
     const container = document.getElementById('dynamic-content');
-    
-    // Проверяем или создаем индикатор загрузки
+    const mainScroller = document.getElementById('main-scroller'); // Получаем контейнер скролла
+
     let sentinel = document.getElementById('scroll-sentinel');
     if (!sentinel) {
         sentinel = document.createElement('div');
@@ -160,7 +160,6 @@ async function loadNextPage() {
         sentinelObserver.observe(sentinel);
     }
 
-    // Увеличим лимит до 10, как обсуждали ранее, для плавности
     let url = `/api/items?page=${currentPage}&limit=10`; 
     if (currentCategory !== 'all') url += `&category=${currentCategory}`;
     if (searchDebounceStr) url += `&search=${searchDebounceStr}`;
@@ -169,21 +168,19 @@ async function loadNextPage() {
         const res = await fetch(url);
         const newItems = await res.json();
         
-        // ВАЖНО: Мы НЕ удаляем sentinel здесь, чтобы не сбить скролл.
-        // Мы будем вставлять товары ПЕРЕД ним.
-
         if (newItems.length === 0) {
             hasMoreItems = false;
-            // Товаров больше нет — теперь можно удалить индикатор
             sentinel.remove(); 
-            
             if (currentPage === 1) {
                 container.innerHTML = '<div style="height:50vh; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:1.5rem;">Нет работ в этой категории.</div>';
             } else {
                 renderFooter(container); 
             }
         } else {
-            // Добавляем новые товары в общий массив
+            // --- ФИКС ПРЫЖКОВ НА НОУТБУКЕ ---
+            // 1. Временно отключаем прилипание, чтобы браузер не сходил с ума при вставке
+            mainScroller.style.scrollSnapType = 'none';
+
             allLoadedItems = [...allLoadedItems, ...newItems];
             
             newItems.forEach(item => {
@@ -192,8 +189,6 @@ async function loadNextPage() {
                 el.dataset.cat = item.category;
                 el.innerHTML = getSlideHTML(item);
                 
-                // ИСПРАВЛЕНИЕ: Вставляем новый слайд ПЕРЕД индикатором загрузки
-                // Это "отодвигает" индикатор вниз, но позиция просмотра остается на месте
                 container.insertBefore(el, sentinel);
                 
                 animationObserver.observe(el);
@@ -201,12 +196,18 @@ async function loadNextPage() {
             });
 
             currentPage++;
-            // Наблюдатель (sentinelObserver) продолжает следить за sentinel, 
-            // который теперь сдвинулся вниз. Ничего перезапускать не нужно.
+
+            // 2. Ждем совсем чуть-чуть, пока браузер отрисует новые блоки, 
+            // и только потом включаем прилипание обратно.
+            // requestAnimationFrame гарантирует, что это произойдет в следующем кадре отрисовки.
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    mainScroller.style.scrollSnapType = 'y mandatory';
+                });
+            });
         }
     } catch (e) {
         console.error(e);
-        // Если ошибка - удаляем спиннер, чтобы можно было попробовать снова (например, перезагрузкой)
         if(sentinel) sentinel.remove();
     } finally {
         isLoading = false;

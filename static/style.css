@@ -98,6 +98,7 @@ body {
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
+    overflow-anchor: none;
 }
 
 /* Контейнер для контента с плавным появлением (ИСПРАВЛЕНИЕ 4) */
