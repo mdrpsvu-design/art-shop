@@ -138,7 +138,7 @@ async function loadNextPage() {
         sentinelObserver.observe(sentinel);
     }
 
-    let url = `/api/items?page=${currentPage}&limit=5`; // Загружаем по 5 штук
+    let url = `/api/items?page=${currentPage}&limit=10`; // Загружаем по 5 штук
     if (currentCategory !== 'all') url += `&category=${currentCategory}`;
     if (searchDebounceStr) url += `&search=${searchDebounceStr}`;
 
