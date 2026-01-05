@@ -1,8 +1,8 @@
 import os
 import secrets
 from typing import List, Optional
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, status, Response
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, status, Response, Body
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
@@ -10,6 +10,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
+from pydantic import BaseModel
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
@@ -21,9 +22,6 @@ security = HTTPBasic()
 
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
 ADMIN_PASS = os.getenv("ADMIN_PASS", "art123")
-
-# Порядок категорий для сортировки
-CATEGORY_ORDER = ["doll", "weaving", "painting", "scrap", "decoupage", "gifts"]
 
 cloudinary.config( 
   cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"), 
@@ -47,13 +45,20 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 # --- Модели БД ---
+
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, index=True)
+    slug = Column(String, unique=True, index=True) # например: "doll"
+    name = Column(String) # например: "Куклы"
+
 class Item(Base):
     __tablename__ = "items"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String)
     price = Column(Float)
-    category = Column(String)
+    category = Column(String) # Здесь храним slug категории
     images = relationship("ItemImage", back_populates="item", cascade="all, delete-orphan")
 
 class ItemImage(Base):
@@ -64,6 +69,32 @@ class ItemImage(Base):
     item = relationship("Item", back_populates="images")
 
 Base.metadata.create_all(bind=engine)
+
+# --- Pydantic модели для API категорий ---
+class CategoryCreate(BaseModel):
+    slug: str
+    name: str
+
+# --- Инициализация базовых категорий ---
+def init_categories():
+    db = SessionLocal()
+    if db.query(Category).count() == 0:
+        initial_cats = [
+            {"slug": "doll", "name": "Куклы"},
+            {"slug": "weaving", "name": "Ткачество"},
+            {"slug": "painting", "name": "Роспись"},
+            {"slug": "scrap", "name": "Скрапбукинг"},
+            {"slug": "decoupage", "name": "Декупаж"},
+            {"slug": "gifts", "name": "Подарки"},
+        ]
+        for cat in initial_cats:
+            db.add(Category(slug=cat['slug'], name=cat['name']))
+        db.commit()
+        print("Базовые категории добавлены.")
+    db.close()
+
+# Запускаем проверку при старте
+init_categories()
 
 def get_db():
     db = SessionLocal()
@@ -98,7 +129,34 @@ def logout():
         headers={"WWW-Authenticate": "Basic realm='Logout'"}
     )
 
-# --- API ---
+# --- API КАТЕГОРИЙ ---
+
+@app.get("/api/categories")
+def get_categories(db: Session = Depends(get_db)):
+    return db.query(Category).all()
+
+@app.post("/api/categories")
+def create_category(cat: CategoryCreate, username: str = Depends(get_current_username), db: Session = Depends(get_db)):
+    existing = db.query(Category).filter(Category.slug == cat.slug).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Category exists")
+    new_cat = Category(slug=cat.slug, name=cat.name)
+    db.add(new_cat)
+    db.commit()
+    return {"status": "ok", "id": new_cat.id}
+
+@app.delete("/api/categories/{cat_id}")
+def delete_category(cat_id: int, username: str = Depends(get_current_username), db: Session = Depends(get_db)):
+    cat = db.query(Category).filter(Category.id == cat_id).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    # Можно добавить проверку: есть ли товары в этой категории, но пока просто удаляем
+    db.delete(cat)
+    db.commit()
+    return {"status": "deleted"}
+
+# --- API ТОВАРОВ ---
 
 @app.get("/api/items")
 def get_items(
@@ -116,21 +174,19 @@ def get_items(
     
     items = query.all()
 
-    # Сортировка
+    # Динамическая сортировка на основе порядка категорий в БД
+    # Получаем список всех slug категорий в порядке их ID (или можно добавить поле sort_order в будущем)
+    categories_db = db.query(Category).all()
+    # Создаем список slug в порядке добавления
+    cat_order_list = [c.slug for c in categories_db]
+
     def sort_key(item):
         try:
-            # Получаем индекс категории
-            cat_index = CATEGORY_ORDER.index(item.category)
+            cat_index = cat_order_list.index(item.category)
         except ValueError:
-            # Если категории нет в списке, отправляем в конец
-            cat_index = 99
-        
-        # ВАЖНО: Возвращаем кортеж (Категория, ID).
-        # Если категории одинаковые, Python будет сравнивать ID.
-        # Это гарантирует, что порядок товаров всегда будет одинаковым.
+            cat_index = 999 # Если категория удалена, кидаем товар в конец
         return (cat_index, item.id)
 
-    # Сортируем, если смотрим "Все" (или если поиск пустой)
     if (not category or category == "all") and not search:
         items.sort(key=sort_key)
     
@@ -186,7 +242,6 @@ def delete_item(item_id: int, username: str = Depends(get_current_username), db:
     db.commit()
     return {"ok": True}
 
-# Исправленный health check, принимающий и GET, и HEAD запросы
 @app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
     return {"status": "alive"}

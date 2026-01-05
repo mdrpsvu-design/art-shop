@@ -2,96 +2,162 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Админка</title>
+    <title>Админка | Handmade Soul</title>
     <style>
         body { font-family: sans-serif; padding: 2rem; background: #f4f4f9; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; display: flex; gap: 30px; }
+        .column { flex: 1; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
         input, select, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background: #5c4033; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button { background: #5c4033; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #4a332a; }
         .item-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
         .thumb { width: 50px; height: 50px; object-fit: cover; margin-right: 15px; border-radius: 4px; }
         .info { display: flex; align-items: center; }
-        .logout-btn { background: #999; text-decoration: none; color: white; padding: 5px 15px; border-radius: 4px; font-size: 0.9rem; }
+        .logout-btn { background: #999; text-decoration: none; color: white; padding: 5px 15px; border-radius: 4px; font-size: 0.9rem; margin-left: auto; display: block; width: fit-content; margin-bottom: 20px;}
+        h2 { margin-top: 0; }
+        .cat-list-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
     </style>
 </head>
 <body>
+    <a href="/logout" class="logout-btn">Выйти</a>
     <div class="container">
-        <div class="header">
-            <h2>Новая работа</h2>
-            <a href="/logout" class="logout-btn">Выйти</a>
-        </div>
         
-        <form id="add-form">
-            <input type="text" name="title" placeholder="Название" required>
-            <textarea name="description" placeholder="Описание..." rows="4" required></textarea>
-            <input type="number" name="price" placeholder="Цена" required>
-            <select name="category">
-                <option value="doll">Куклы</option>
-                <option value="weaving">Ткачество</option>
-                <option value="painting">Роспись</option>
-                <option value="scrap">Скрапбукинг</option>
-                <option value="decoupage">Декупаж</option>
-                <option value="gifts">Подарки</option>
-            </select>
-            <label>Фотографии (можно выбрать несколько):</label>
-            <!-- allow multiple files -->
-            <input type="file" name="files" multiple required>
-            <button type="submit">Загрузить</button>
-        </form>
+        <!-- КОЛОНКА 1: КАТЕГОРИИ -->
+        <div class="column">
+            <h2>Категории</h2>
+            <form id="cat-form">
+                <input type="text" name="name" placeholder="Название (напр. Куклы)" required>
+                <input type="text" name="slug" placeholder="ID (англ., без пробелов, напр. doll)" required>
+                <button type="submit">Добавить категорию</button>
+            </form>
+            <div id="cat-list" style="margin-top: 20px;"></div>
+        </div>
 
-        <h3 style="margin-top:40px;">Товары</h3>
-        <div id="items-list"></div>
+        <!-- КОЛОНКА 2: ТОВАРЫ -->
+        <div class="column">
+            <h2>Новая работа</h2>
+            <form id="add-form">
+                <input type="text" name="title" placeholder="Название" required>
+                <textarea name="description" placeholder="Описание..." rows="4" required></textarea>
+                <input type="number" name="price" placeholder="Цена" required>
+                <select name="category" id="item-category-select" required>
+                    <option value="" disabled selected>Выберите категорию...</option>
+                    <!-- Опции загрузятся через JS -->
+                </select>
+                <label>Фотографии (можно выбрать несколько):</label>
+                <input type="file" name="files" multiple required>
+                <button type="submit">Загрузить товар</button>
+            </form>
+
+            <h3 style="margin-top:40px;">Список товаров</h3>
+            <div id="items-list"></div>
+        </div>
     </div>
 
     <script>
-        const form = document.getElementById('add-form');
-        const list = document.getElementById('items-list');
+        const itemForm = document.getElementById('add-form');
+        const catForm = document.getElementById('cat-form');
+        const itemsList = document.getElementById('items-list');
+        const catList = document.getElementById('cat-list');
+        const itemCatSelect = document.getElementById('item-category-select');
 
+        // --- КАТЕГОРИИ ---
+        async function loadCategories() {
+            const res = await fetch('/api/categories');
+            const cats = await res.json();
+            
+            // Очистка
+            catList.innerHTML = '';
+            itemCatSelect.innerHTML = '<option value="" disabled selected>Выберите категорию...</option>';
+
+            cats.forEach(c => {
+                // Список для удаления
+                catList.innerHTML += `
+                    <div class="cat-list-item">
+                        <span><b>${c.name}</b> <small>(${c.slug})</small></span>
+                        <button onclick="deleteCategory(${c.id})" style="background:#e74c3c; padding: 5px 10px; font-size: 0.8rem;">X</button>
+                    </div>
+                `;
+                // Select для товаров
+                const opt = document.createElement('option');
+                opt.value = c.slug;
+                opt.innerText = c.name;
+                itemCatSelect.appendChild(opt);
+            });
+        }
+
+        catForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                name: catForm.name.value,
+                slug: catForm.slug.value
+            };
+            const res = await fetch('/api/categories', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if(res.ok) {
+                catForm.reset();
+                loadCategories(); // Обновляем списки
+            } else {
+                alert('Ошибка: возможно, такой ID уже есть.');
+            }
+        };
+
+        async function deleteCategory(id) {
+            if(confirm('Удалить категорию? Товары с этой категорией могут перестать отображаться корректно.')) {
+                await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+                loadCategories();
+            }
+        }
+
+        // --- ТОВАРЫ ---
         async function loadItems() {
-            const res = await fetch('/api/items');
+            const res = await fetch('/api/items?limit=100'); // Грузим побольше для админки
             const items = await res.json();
-            list.innerHTML = '';
+            itemsList.innerHTML = '';
             items.forEach(item => {
-                // Берем первую картинку для превью, если есть
                 const img = item.images.length > 0 ? item.images[0] : '';
-                list.innerHTML += `
+                itemsList.innerHTML += `
                     <div class="item-row">
                         <div class="info">
                             ${img ? `<img src="${img}" class="thumb">` : ''}
-                            <div><b>${item.title}</b><br>${item.price} ₽</div>
+                            <div><b>${item.title}</b><br>${item.price} ₽ <small>(${item.category})</small></div>
                         </div>
-                        <button onclick="deleteItem(${item.id})" style="background:#e74c3c;">X</button>
+                        <button onclick="deleteItem(${item.id})" style="background:#e74c3c; padding: 5px 10px;">X</button>
                     </div>
                 `;
             });
         }
 
-        form.onsubmit = async (e) => {
+        itemForm.onsubmit = async (e) => {
             e.preventDefault();
-            const btn = form.querySelector('button');
+            const btn = itemForm.querySelector('button[type="submit"]');
             btn.disabled = true; btn.innerText = "Отправка...";
             
-            const formData = new FormData(form);
-            // Файлы автоматически добавятся как список благодаря name="files" и multiple
-
+            const formData = new FormData(itemForm);
             const res = await fetch('/api/items', { method: 'POST', body: formData });
             if (res.ok) {
-                alert('Готово!');
-                form.reset();
+                alert('Товар добавлен!');
+                itemForm.reset();
                 loadItems();
             } else {
                 alert('Ошибка загрузки');
             }
-            btn.disabled = false; btn.innerText = "Загрузить";
+            btn.disabled = false; btn.innerText = "Загрузить товар";
         };
 
         async function deleteItem(id) {
-            if(confirm('Удалить?')) {
+            if(confirm('Удалить товар?')) {
                 await fetch(`/api/items/${id}`, { method: 'DELETE' });
                 loadItems();
             }
         }
+
+        // Инициализация
+        loadCategories();
         loadItems();
     </script>
 </body>

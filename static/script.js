@@ -1,22 +1,20 @@
 const TG_USER = "martianovaolga"; 
 let currentCategory = 'all';
-let allLoadedItems = []; // Хранилище всех загруженных товаров (для модалок)
+let allLoadedItems = [];
 let currentPage = 1;
 let isLoading = false;
 let hasMoreItems = true;
 let searchDebounceStr = '';
 
-// Observer для анимации появления (прозрачность -> видимость)
+// Observer'ы
 const animationObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('visible');
     });
 }, { threshold: 0.1 });
 
-// Observer для подсветки меню категорий
 const spyObserver = new IntersectionObserver((entries) => {
     if (currentCategory !== 'all') return;
-    
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const cat = entry.target.dataset.cat;
@@ -25,7 +23,6 @@ const spyObserver = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.5 }); 
 
-// Observer для бесконечной прокрутки (следит за "дном" списка)
 const sentinelObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting && hasMoreItems && !isLoading) {
@@ -33,6 +30,94 @@ const sentinelObserver = new IntersectionObserver((entries) => {
         }
     });
 }, { rootMargin: "200px" });
+
+// --- НОВАЯ ФУНКЦИЯ ЗАГРУЗКИ МЕНЮ ---
+async function initApp() {
+    try {
+        // 1. Загружаем категории
+        const res = await fetch('/api/categories');
+        const categories = await res.json();
+        
+        const navContainer = document.getElementById('nav-container');
+        navContainer.innerHTML = ''; // Очистка на всякий случай
+
+        // Добавляем кнопку "Коллекция" (Все) вручную первой
+        const allBtn = document.createElement('button');
+        allBtn.className = 'cat-btn active';
+        allBtn.dataset.cat = 'all';
+        allBtn.innerText = 'Коллекция';
+        navContainer.appendChild(allBtn);
+
+        // Добавляем остальные из базы
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.dataset.cat = cat.slug;
+            btn.innerText = cat.name;
+            navContainer.appendChild(btn);
+        });
+
+        // 2. Вешаем слушатели событий на кнопки (используем делегирование или forEach)
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', handleCategoryClick);
+        });
+
+        // 3. Загружаем контент
+        resetGalleryState();
+        loadNextPage();
+        setupObservers();
+
+    } catch (e) {
+        console.error("Ошибка инициализации:", e);
+    }
+}
+
+function handleCategoryClick(e) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    
+    currentCategory = e.target.dataset.cat;
+    searchDebounceStr = ''; 
+    document.getElementById('search-input').value = '';
+
+    document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
+    
+    resetGalleryState();
+    loadNextPage();
+}
+
+function setupObservers() {
+    const heroSection = document.getElementById('hero-section');
+    if (heroSection) {
+        spyObserver.observe(heroSection);
+    }
+    
+    setTimeout(() => {
+        const hText = document.querySelector('.hero-text');
+        const hImg = document.querySelector('.hero-image-box');
+        if(hText) hText.classList.add('visible');
+        if(hImg) hImg.classList.add('visible');
+    }, 100);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Вместо прямой загрузки запускаем инициализацию
+    initApp();
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) closeModal(event.target.id);
+    }
+
+    let debounce;
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            searchDebounceStr = e.target.value;
+            resetGalleryState();
+            loadNextPage();
+        }, 500);
+    });
+});
 
 function highlightMenu(cat) {
     document.querySelectorAll('.cat-btn').forEach(b => {
