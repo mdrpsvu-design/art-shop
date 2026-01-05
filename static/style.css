@@ -37,19 +37,34 @@ body {
     cursor: pointer;
 }
 
-/* ИЗМЕНЕНИЕ: По умолчанию короткая версия скрыта */
 .logo-short {
     display: none;
 }
 
 .header-right { display: flex; align-items: center; gap: 20px; }
 
+/* --- ИЗМЕНЕНИЕ 1: Анимация подчеркивания для кнопки Контакты --- */
 .contact-trigger {
     background: none; border: none; font-family: var(--font-body);
     text-transform: uppercase; letter-spacing: 1px; cursor: pointer; color: #555;
     transition: 0.3s;
+    
+    /* Для позиционирования линии */
+    position: relative; 
+    padding-bottom: 5px; 
 }
+
 .contact-trigger:hover { color: var(--accent); }
+
+/* Рисуем линию (так же, как у .cat-btn) */
+.contact-trigger::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px;
+    background: var(--accent); transition: width 0.3s ease;
+}
+
+/* При наведении линия растягивается */
+.contact-trigger:hover::after { width: 100%; }
+
 
 .search-box { 
     position: relative; /* База для позиционирования иконки */
@@ -106,7 +121,7 @@ body {
     overflow-anchor: none;
 }
 
-/* Контейнер для контента с плавным появлением (ИСПРАВЛЕНИЕ 4) */
+/* Контейнер для контента с плавным появлением */
 #dynamic-content {
     transition: opacity 0.4s ease-in-out;
     opacity: 1;
@@ -148,17 +163,16 @@ body {
     margin-top: 50px; 
     display: flex; 
     align-items: center; 
-    gap: 15px; /* Чуть увеличили отступ между словом и линией */
+    gap: 15px; 
     cursor: pointer; 
     color: var(--accent); 
-    width: fit-content; /* Чтобы зона клика не была во всю ширину */
+    width: fit-content; 
 }
 
 .scroll-hint .line {
     height: 1px;
     width: 40px;
     background: var(--accent);
-    
     transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -203,13 +217,24 @@ body {
 .art-price { font-size: 1.8rem; color: var(--accent); font-family: var(--font-head); margin-bottom: 30px; font-style: italic; }
 
 .btn-group { display: flex; gap: 15px; }
+
+/* Кнопки действий */
 .action-btn {
     padding: 15px 35px; border: none; cursor: pointer;
     font-family: var(--font-body); text-transform: uppercase; letter-spacing: 1px;
-    font-size: 0.8rem; transition: 0.3s;
+    font-size: 0.8rem; 
+    transition: all 0.3s ease; /* Включаем плавную анимацию для всех свойств */
 }
+
+/* --- ИЗМЕНЕНИЕ 3: Анимация кнопки покупки (в т.ч. в модалке) --- */
 .buy-btn { background: var(--text); color: #fff; }
-.buy-btn:hover { background: var(--accent); }
+
+.buy-btn:hover { 
+    background: var(--accent); 
+    transform: translateY(-3px); /* Кнопка немного приподнимается */
+    box-shadow: 0 5px 15px rgba(154, 123, 96, 0.4); /* Появляется мягкая тень */
+}
+
 .desc-btn { background: transparent; border: 1px solid #ccc; color: #555; }
 .desc-btn:hover { border-color: var(--text); color: var(--text); }
 
@@ -224,7 +249,7 @@ body {
 
 @keyframes stretchLine {
     0% { width: 40px; opacity: 0.7; }
-    50% { width: 80px; opacity: 1; } /* Растягивается до 80px */
+    50% { width: 80px; opacity: 1; } 
     100% { width: 40px; opacity: 0.7; }
 }
 
@@ -232,7 +257,28 @@ body {
 .close-modal:hover { color: var(--accent); }
 .desc-text { text-align: left; white-space: pre-wrap; max-height: 50vh; overflow-y: auto; line-height: 1.6; }
 .contact-links { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-.contact-row { text-decoration: none; color: #555; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+/* --- ИЗМЕНЕНИЕ 2: Анимация ссылок в контактах --- */
+.contact-row { 
+    text-decoration: none; 
+    color: #555; 
+    font-size: 1.1rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 10px; 
+    
+    padding: 10px; /* Добавили немного воздуха для клика */
+    border-radius: 8px; /* Скругление углов при наведении */
+    transition: transform 0.3s, color 0.3s, background-color 0.3s; /* Плавность */
+}
+
+.contact-row:hover {
+    color: var(--accent); /* Цвет текста меняется на акцентный */
+    transform: scale(1.05); /* Легкое увеличение */
+    background-color: rgba(0,0,0,0.02); /* Еле заметный фон */
+}
+
 
 /* --- MOBILE ADAPTATION --- */
 @media (max-width: 900px) {
@@ -244,7 +290,6 @@ body {
 
     .logo { font-size: 1.4rem; letter-spacing: 1px; }
     
-    /* ИЗМЕНЕНИЕ: Прячем полную версию и показываем короткую на мобильных */
     .logo-full { display: none; }
     .logo-short { display: inline; }
     
@@ -290,9 +335,9 @@ body {
     
     .btn-group { width: 100%; gap: 10px; }
     .action-btn { 
-        flex: 1; /* Растягиваться равномерно */
+        flex: 1; 
         width: auto; 
-        min-width: 0; /* Игнорировать ширину контента при расчете flex */
+        min-width: 0; 
         padding: 12px 0; 
         font-size: 0.75rem; 
     }
@@ -311,37 +356,35 @@ body {
     .desc-text { max-height: none; }
 }
 
-/* --- CUSTOM SCROLLBAR (Дизайн скроллбара) --- */
+/* --- CUSTOM SCROLLBAR --- */
 
-/* Для Firefox */
 .scroll-snap-container {
-    scrollbar-width: thin; /* Тонкий скроллбар */
-    scrollbar-color: var(--accent) transparent; /* Ползунок и фон */
+    scrollbar-width: thin; 
+    scrollbar-color: var(--accent) transparent; 
 }
 
-/* Для Chrome, Safari, Edge */
 .scroll-snap-container::-webkit-scrollbar {
-    width: 6px; /* Ширина всего 6px */
+    width: 6px; 
 }
 
 .scroll-snap-container::-webkit-scrollbar-track {
-    background: transparent; /* Фон прозрачный */
+    background: transparent; 
 }
 
 .scroll-snap-container::-webkit-scrollbar-thumb {
-    background-color: var(--accent); /* Цвет ползунка (ваш коричневый) */
-    border-radius: 20px; /* Закругление */
-    border: 2px solid transparent; /* Отступ внутри, чтобы казался тоньше */
+    background-color: var(--accent); 
+    border-radius: 20px; 
+    border: 2px solid transparent; 
     background-clip: content-box;
 }
 
 .scroll-snap-container::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text); /* Темнеет при наведении */
+    background-color: var(--text); 
 }
 
-/* --- FOOTER SLIDE (Секция конца списка) --- */
+/* --- FOOTER SLIDE --- */
 .footer-section {
-    background-color: #f7f5f0; /* Чуть темнее основного фона */
+    background-color: #f7f5f0; 
     text-align: center;
     flex-direction: column;
 }
@@ -387,14 +430,14 @@ body {
     color: #fff;
 }
 
-/* --- LOADER (Бесконечная прокрутка) --- */
+/* --- LOADER --- */
 #scroll-sentinel {
     width: 100%;
     height: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
-    scroll-snap-align: center; /* Чтобы скролл не "дергался" */
+    scroll-snap-align: center; 
 }
 
 .loader-spinner {
