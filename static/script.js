@@ -138,7 +138,7 @@ function setupObservers() {
     
     setTimeout(() => {
         const hText = document.querySelector('.hero-text');
-        const hImg = document.querySelector('.hero-image-box');
+        const hImg = document.querySelector('.hero-marquee-box');
         if(hText) hText.classList.add('visible');
         if(hImg) hImg.classList.add('visible');
     }, 100);
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     setTimeout(() => {
         const hText = document.querySelector('.hero-text');
-        const hImg = document.querySelector('.hero-image-box');
+        const hImg = document.querySelector('.hero-marquee-box');
         if(hText) hText.classList.add('visible');
         if(hImg) hImg.classList.add('visible');
     }, 100);
