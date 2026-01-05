@@ -84,17 +84,39 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function resetToHero() {
+    // 1. Очищаем поле поиска визуально
+    document.getElementById('search-input').value = '';
+
+    // 2. Проверяем, нужно ли перезагружать данные.
+    // Перезагрузка нужна ТОЛЬКО если:
+    // А) Была выбрана конкретная категория (не 'all')
+    // Б) Или был активен поиск
+    const needReload = (currentCategory !== 'all') || (searchDebounceStr !== '');
+
+    // 3. Сбрасываем внутренние переменные в дефолт
     currentCategory = 'all';
     searchDebounceStr = '';
-    document.getElementById('search-input').value = '';
-    
+
+    // 4. Обновляем кнопки меню (подсвечиваем "Коллекция")
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');
-    
+
+    // 5. Гарантируем, что Hero-секция видима (она могла скрыться при поиске)
+    document.getElementById('hero-section').style.display = 'flex';
+
+    // 6. Скроллим наверх
     document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
-    
-    resetGalleryState();
-    loadNextPage();
+
+    // 7. Самое важное:
+    if (needReload) {
+        // Если мы пришли из "Кукол" или поиска -> нам нужно сбросить список,
+        // чтобы показать полную коллекцию заново.
+        resetGalleryState();
+        loadNextPage();
+    } else {
+        // Если мы и так смотрели "Коллекцию" -> НИЧЕГО НЕ УДАЛЯЕМ.
+        // Просто скроллим вверх (пункт 6). Все прогруженные товары остаются внизу.
+    }
 }
 
 function scrollToNext() {
