@@ -166,5 +166,7 @@ def delete_item(item_id: int, username: str = Depends(get_current_username), db:
     db.commit()
     return {"ok": True}
 
-@app.get("/health")
-def health_check(): return {"status": "alive"}
+# Исправленный health check, принимающий и GET, и HEAD запросы
+@app.api_route("/health", methods=["GET", "HEAD"])
+def health_check():
+    return {"status": "alive"}
