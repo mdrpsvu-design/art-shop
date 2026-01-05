@@ -168,13 +168,15 @@ body {
     height: 100%; /* На всю высоту секции */
 }
 .hero-text { 
-    flex: 0 0 auto; /* Не растягиваемся, занимаем свой размер */
-    width: 40%; /* Текст занимает 40% ширины */
+    /* Изменили flex: 0 0 auto на жесткие 40% */
+    flex: 0 0 40%; 
+    width: 40%; 
+    
     opacity: 0; 
     transform: translateY(30px); 
     transition: 1s ease 0.5s; 
     text-align: left; 
-    z-index: 2; /* Текст поверх картинок, если вдруг наедут */
+    z-index: 2; 
 }
 .hero-text.visible { opacity: 1; transform: translateY(0); }
 
@@ -184,18 +186,21 @@ body {
 .bio { font-size: 1.1rem; line-height: 1.6; color: #555; max-width: 450px; }
 
 .hero-marquee-box {
-    flex: 1; /* Занимает все оставшееся место справа */
+    flex: 1; 
+    
+    /* !!! САМОЕ ВАЖНОЕ: добавляем min-width: 0 !!! */
+    /* Это запрещает блоку растягиваться за пределы экрана из-за длинной ленты */
+    min-width: 0; 
+    
     height: 100%;
     display: flex;
-    align-items: center; /* Центрируем ленту по вертикали */
+    align-items: center; 
     opacity: 0;
     transition: 1.5s ease;
     
-    /* Маска, чтобы края плавно исчезали (опционально, красиво смотрится) */
     mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
     -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-}
-.hero-marquee-box.visible { opacity: 1; }
+}.hero-marquee-box.visible { opacity: 1; }
 
 .marquee-window {
     width: 100%;
@@ -442,14 +447,6 @@ body {
         flex: 0 0 auto; /* Не сжимать и не растягивать блок фото */
     }
     
-    .hero-img { 
-        width: auto;
-        max-width: 80%;
-        height: auto;
-        max-height: 30vh; /* УМЕНЬШИЛИ фото до 30% высоты экрана */
-        object-fit: contain;
-    }
-    
     .hero-text {
         width: 100%;
         text-align: center;
@@ -460,12 +457,13 @@ body {
 
     .hero-text h1 { font-size: 2.5rem; }
 
-    .hero-marquee-box {
-        width: 100vw; /* На всю ширину экрана телефона */
-        margin-left: -20px; /* Компенсация padding родителя */
+    .hero-marquee-box { 
+        margin-bottom: 5px; 
+        order: -1; /* Картинка сверху */
+        flex: 0 0 auto; 
+        width: 100vw; /* На всю ширину */
+        margin-left: -20px;
         margin-right: -20px;
-        mask-image: none; /* На телефоне убираем маску по краям */
-        -webkit-mask-image: none;
     }
     
     .marquee-img {
