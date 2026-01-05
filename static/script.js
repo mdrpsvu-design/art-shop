@@ -1,26 +1,37 @@
-const TG_USER = "martianovaolga"; // Добавляем это (без @)
+const TG_USER = "martianovaolga"; 
 let currentCategory = 'all';
-let itemsData = []; 
+let allLoadedItems = []; // Хранилище всех загруженных товаров (для модалок)
+let currentPage = 1;
+let isLoading = false;
+let hasMoreItems = true;
+let searchDebounceStr = '';
 
-// Основной observer для анимации появления текста/картинок
+// Observer для анимации появления (прозрачность -> видимость)
 const animationObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('visible');
     });
 }, { threshold: 0.1 });
 
-// ИСПРАВЛЕНИЕ 4 (Часть 1): Шпион для меню категорий при скролле
+// Observer для подсветки меню категорий
 const spyObserver = new IntersectionObserver((entries) => {
-    // Работает только если мы смотрим всю коллекцию, иначе меню должно стоять на выбранной категории
     if (currentCategory !== 'all') return;
-
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const cat = entry.target.dataset.cat;
             if (cat) highlightMenu(cat);
         }
     });
-}, { threshold: 0.5 }); // Срабатывает, когда товар на 50% на экране
+}, { threshold: 0.5 });
+
+// Observer для бесконечной прокрутки (следит за "дном" списка)
+const sentinelObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && hasMoreItems && !isLoading) {
+            loadNextPage();
+        }
+    });
+}, { rootMargin: "200px" }); // Начинаем грузить за 200px до конца
 
 function highlightMenu(cat) {
     document.querySelectorAll('.cat-btn').forEach(b => {
@@ -30,7 +41,9 @@ function highlightMenu(cat) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadGallery();
+    // Первая инициализация
+    resetGalleryState();
+    loadNextPage();
     
     setTimeout(() => {
         const hText = document.querySelector('.hero-text');
@@ -40,102 +53,139 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 100);
 
     window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            closeModal(event.target.id);
-        }
+        if (event.target.classList.contains('modal')) closeModal(event.target.id);
     }
 
     let debounce;
     document.getElementById('search-input').addEventListener('input', (e) => {
         clearTimeout(debounce);
-        debounce = setTimeout(() => loadGallery(e.target.value), 500);
+        debounce = setTimeout(() => {
+            searchDebounceStr = e.target.value;
+            resetGalleryState();
+            loadNextPage();
+        }, 500);
     });
 
     document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Если кликнули, жестко ставим активный класс
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             
             currentCategory = e.target.dataset.cat;
-            
-            // Скролл вверх
+            searchDebounceStr = ''; // Сброс поиска при смене категории
+            document.getElementById('search-input').value = '';
+
             document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
             
-            // Загрузка
-            loadGallery();
+            resetGalleryState();
+            loadNextPage();
         });
     });
 });
 
 function resetToHero() {
     currentCategory = 'all';
+    searchDebounceStr = '';
     document.getElementById('search-input').value = '';
+    
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');
+    
     document.getElementById('main-scroller').scrollTo({ top: 0, behavior: 'smooth' });
-    loadGallery();
+    
+    resetGalleryState();
+    loadNextPage();
 }
 
 function scrollToNext() {
     document.getElementById('main-scroller').scrollBy({ top: window.innerHeight, behavior: 'smooth' });
 }
 
-// ИСПРАВЛЕНИЕ 4 (Часть 2): Плавное выцветание при смене
-async function loadGallery(search = '') {
-    const hero = document.getElementById('hero-section');
-    const container = document.getElementById('dynamic-content');
-
-    // 1. Скрываем (Fade Out)
-    container.classList.add('fading');
+// Сброс состояния перед новой фильтрацией/категорией
+function resetGalleryState() {
+    currentPage = 1;
+    hasMoreItems = true;
+    allLoadedItems = [];
+    isLoading = false;
     
-    // Ждем анимацию исчезновения (300ms)
-    await new Promise(r => setTimeout(r, 300));
-
-    // Логика показа Hero
-    if (search) hero.style.display = 'none';
+    const container = document.getElementById('dynamic-content');
+    container.innerHTML = ''; // Очищаем старые товары
+    
+    // Удаляем старый сентинел (индикатор загрузки), если был
+    const oldSentinel = document.getElementById('scroll-sentinel');
+    if (oldSentinel) oldSentinel.remove();
+    
+    // Логика Hero секции
+    const hero = document.getElementById('hero-section');
+    if (searchDebounceStr) hero.style.display = 'none';
     else if (currentCategory === 'all') hero.style.display = 'flex';
     else hero.style.display = 'none';
+}
 
-    let url = `/api/items?`;
-    if (currentCategory !== 'all') url += `category=${currentCategory}&`;
-    if (search) url += `search=${search}`;
+// Загрузка следующей порции
+async function loadNextPage() {
+    if (isLoading || !hasMoreItems) return;
+    isLoading = true;
+
+    // Добавляем индикатор загрузки в конец списка
+    const container = document.getElementById('dynamic-content');
+    let sentinel = document.getElementById('scroll-sentinel');
+    if (!sentinel) {
+        sentinel = document.createElement('div');
+        sentinel.id = 'scroll-sentinel';
+        sentinel.innerHTML = '<div class="loader-spinner"></div>';
+        container.appendChild(sentinel);
+        sentinelObserver.observe(sentinel);
+    }
+
+    let url = `/api/items?page=${currentPage}&limit=5`; // Загружаем по 5 штук
+    if (currentCategory !== 'all') url += `&category=${currentCategory}`;
+    if (searchDebounceStr) url += `&search=${searchDebounceStr}`;
 
     try {
         const res = await fetch(url);
-        itemsData = await res.json();
-        renderItems();
-    } catch (e) { console.error(e); }
+        const newItems = await res.json();
+        
+        // Убираем спиннер перед рендером, чтобы вставить его потом в конец
+        sentinel.remove(); 
 
-    // 2. Показываем (Fade In) с небольшой задержкой для рендеринга
-    requestAnimationFrame(() => {
-        container.classList.remove('fading');
-    });
+        if (newItems.length === 0) {
+            hasMoreItems = false;
+            if (currentPage === 1) {
+                container.innerHTML = '<div style="height:50vh; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:1.5rem;">Нет работ в этой категории.</div>';
+            } else {
+                renderFooter(container); // Конец списка
+            }
+        } else {
+            // Добавляем новые товары в общий массив
+            allLoadedItems = [...allLoadedItems, ...newItems];
+            
+            // Рендерим
+            newItems.forEach(item => {
+                const el = document.createElement('section');
+                el.className = `slide-section theme-${item.category}`;
+                el.dataset.cat = item.category;
+                el.innerHTML = getSlideHTML(item);
+                container.appendChild(el);
+                
+                animationObserver.observe(el);
+                spyObserver.observe(el);
+            });
+
+            currentPage++;
+            
+            // Возвращаем сентинел в конец для следующей загрузки
+            container.appendChild(sentinel);
+            sentinelObserver.observe(sentinel);
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        isLoading = false;
+    }
 }
 
-function renderItems() {
-    const container = document.getElementById('dynamic-content');
-    container.innerHTML = '';
-    
-    // Если товаров нет
-    if (itemsData.length === 0) {
-        container.innerHTML = '<div style="height:50vh; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:1.5rem;">Нет работ в этой категории.</div>';
-        return;
-    }
-
-    // Рендерим товары
-    itemsData.forEach(item => {
-        const el = document.createElement('section');
-        el.className = `slide-section theme-${item.category}`;
-        el.dataset.cat = item.category; 
-        el.innerHTML = getSlideHTML(item);
-        container.appendChild(el);
-        
-        animationObserver.observe(el);
-        spyObserver.observe(el);
-    });
-
-    // --- ДОБАВЛЯЕМ ФИНАЛЬНЫЙ СЛАЙД (FOOTER) ---
+function renderFooter(container) {
     const footerEl = document.createElement('section');
     footerEl.className = 'slide-section footer-section';
     footerEl.innerHTML = `
@@ -149,7 +199,7 @@ function renderItems() {
         </div>
     `;
     container.appendChild(footerEl);
-    animationObserver.observe(footerEl); // Чтобы сработала анимация появления
+    animationObserver.observe(footerEl);
 }
 
 function getSlideHTML(item) {
@@ -196,31 +246,21 @@ window.changeSlide = function(btn, dir, images) {
     }, 300);
 };
 
-window.openModal = function(id) {
-    document.getElementById(id).style.display = 'block';
-};
-
-window.closeModal = function(id) {
-    document.getElementById(id).style.display = 'none';
-};
+window.openModal = function(id) { document.getElementById(id).style.display = 'block'; };
+window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; };
 
 window.openTg = function(id) {
-    const item = itemsData.find(i => i.id === id);
+    const item = allLoadedItems.find(i => i.id === id); // Ищем в глобальном массиве
     if(!item) return;
     const text = `Здравствуйте! Хочу приобрести "${item.title}" за ${item.price}р.`;
-    
     const url = `https://t.me/${TG_USER}?text=${encodeURIComponent(text)}`;
-
     const btn = document.getElementById('tg-go-btn');
-    if (btn) {
-        btn.onclick = () => window.open(url, '_blank');
-    }
-
+    if (btn) btn.onclick = () => window.open(url, '_blank');
     openModal('tg-modal');
 };
 
 window.openDesc = function(id) {
-    const item = itemsData.find(i => i.id === id);
+    const item = allLoadedItems.find(i => i.id === id); // Ищем в глобальном массиве
     if(!item) return;
     document.getElementById('desc-title').innerText = item.title;
     document.getElementById('desc-text').innerText = item.description;

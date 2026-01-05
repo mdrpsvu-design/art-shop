@@ -99,30 +99,44 @@ def logout():
     )
 
 # --- API ---
+
 @app.get("/api/items")
-def get_items(category: Optional[str] = None, search: Optional[str] = None, db: Session = Depends(get_db)):
+def get_items(
+    category: Optional[str] = None, 
+    search: Optional[str] = None, 
+    page: int = 1,          # Добавили параметр страницы
+    limit: int = 5,         # Добавили лимит (5 товаров за раз)
+    db: Session = Depends(get_db)
+):
     query = db.query(Item)
     if category and category != "all":
         query = query.filter(Item.category == category)
     if search:
         query = query.filter(Item.title.ilike(f"%{search}%"))
     
+    # Получаем все товары (SQLAlchemy ленивый, но для сортировки Python'ом придется достать)
     items = query.all()
 
-    # Сортировка согласно порядку категорий (Пункт 6)
-    # Если категория не в списке, она уходит в конец (index 99)
+    # Сортировка (как и была)
     def sort_key(item):
         try:
             return CATEGORY_ORDER.index(item.category)
         except ValueError:
             return 99
 
-    # Сортируем только если выбрана "Коллекция" (все категории) и нет поиска
     if (not category or category == "all") and not search:
         items.sort(key=sort_key)
+    
+    # --- ПАГИНАЦИЯ (Slicing) ---
+    # Рассчитываем срез списка для текущей страницы
+    start_index = (page - 1) * limit
+    end_index = start_index + limit
+    
+    # Берём только нужный кусок
+    paginated_items = items[start_index:end_index]
 
     result = []
-    for i in items:
+    for i in paginated_items:
         result.append({
             "id": i.id,
             "title": i.title,
@@ -131,6 +145,7 @@ def get_items(category: Optional[str] = None, search: Optional[str] = None, db: 
             "category": i.category,
             "images": [img.url for img in i.images]
         })
+    
     return result
 
 @app.post("/api/items")
