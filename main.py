@@ -104,8 +104,8 @@ def logout():
 def get_items(
     category: Optional[str] = None, 
     search: Optional[str] = None, 
-    page: int = 1,          # Добавили параметр страницы
-    limit: int = 5,         # Добавили лимит (5 товаров за раз)
+    page: int = 1, 
+    limit: int = 5, 
     db: Session = Depends(get_db)
 ):
     query = db.query(Item)
@@ -114,25 +114,30 @@ def get_items(
     if search:
         query = query.filter(Item.title.ilike(f"%{search}%"))
     
-    # Получаем все товары (SQLAlchemy ленивый, но для сортировки Python'ом придется достать)
     items = query.all()
 
-    # Сортировка (как и была)
+    # Сортировка
     def sort_key(item):
         try:
-            return CATEGORY_ORDER.index(item.category)
+            # Получаем индекс категории
+            cat_index = CATEGORY_ORDER.index(item.category)
         except ValueError:
-            return 99
+            # Если категории нет в списке, отправляем в конец
+            cat_index = 99
+        
+        # ВАЖНО: Возвращаем кортеж (Категория, ID).
+        # Если категории одинаковые, Python будет сравнивать ID.
+        # Это гарантирует, что порядок товаров всегда будет одинаковым.
+        return (cat_index, item.id)
 
+    # Сортируем, если смотрим "Все" (или если поиск пустой)
     if (not category or category == "all") and not search:
         items.sort(key=sort_key)
     
-    # --- ПАГИНАЦИЯ (Slicing) ---
-    # Рассчитываем срез списка для текущей страницы
+    # Пагинация
     start_index = (page - 1) * limit
     end_index = start_index + limit
     
-    # Берём только нужный кусок
     paginated_items = items[start_index:end_index]
 
     result = []
