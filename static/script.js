@@ -122,13 +122,13 @@ function resetGalleryState() {
     else hero.style.display = 'none';
 }
 
-// Загрузка следующей порции
 async function loadNextPage() {
     if (isLoading || !hasMoreItems) return;
     isLoading = true;
 
-    // Добавляем индикатор загрузки в конец списка
     const container = document.getElementById('dynamic-content');
+    
+    // Проверяем или создаем индикатор загрузки
     let sentinel = document.getElementById('scroll-sentinel');
     if (!sentinel) {
         sentinel = document.createElement('div');
@@ -138,7 +138,8 @@ async function loadNextPage() {
         sentinelObserver.observe(sentinel);
     }
 
-    let url = `/api/items?page=${currentPage}&limit=10`; // Загружаем по 5 штук
+    // Увеличим лимит до 10, как обсуждали ранее, для плавности
+    let url = `/api/items?page=${currentPage}&limit=10`; 
     if (currentCategory !== 'all') url += `&category=${currentCategory}`;
     if (searchDebounceStr) url += `&search=${searchDebounceStr}`;
 
@@ -146,40 +147,45 @@ async function loadNextPage() {
         const res = await fetch(url);
         const newItems = await res.json();
         
-        // Убираем спиннер перед рендером, чтобы вставить его потом в конец
-        sentinel.remove(); 
+        // ВАЖНО: Мы НЕ удаляем sentinel здесь, чтобы не сбить скролл.
+        // Мы будем вставлять товары ПЕРЕД ним.
 
         if (newItems.length === 0) {
             hasMoreItems = false;
+            // Товаров больше нет — теперь можно удалить индикатор
+            sentinel.remove(); 
+            
             if (currentPage === 1) {
                 container.innerHTML = '<div style="height:50vh; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:1.5rem;">Нет работ в этой категории.</div>';
             } else {
-                renderFooter(container); // Конец списка
+                renderFooter(container); 
             }
         } else {
             // Добавляем новые товары в общий массив
             allLoadedItems = [...allLoadedItems, ...newItems];
             
-            // Рендерим
             newItems.forEach(item => {
                 const el = document.createElement('section');
                 el.className = `slide-section theme-${item.category}`;
                 el.dataset.cat = item.category;
                 el.innerHTML = getSlideHTML(item);
-                container.appendChild(el);
+                
+                // ИСПРАВЛЕНИЕ: Вставляем новый слайд ПЕРЕД индикатором загрузки
+                // Это "отодвигает" индикатор вниз, но позиция просмотра остается на месте
+                container.insertBefore(el, sentinel);
                 
                 animationObserver.observe(el);
                 spyObserver.observe(el);
             });
 
             currentPage++;
-            
-            // Возвращаем сентинел в конец для следующей загрузки
-            container.appendChild(sentinel);
-            sentinelObserver.observe(sentinel);
+            // Наблюдатель (sentinelObserver) продолжает следить за sentinel, 
+            // который теперь сдвинулся вниз. Ничего перезапускать не нужно.
         }
     } catch (e) {
         console.error(e);
+        // Если ошибка - удаляем спиннер, чтобы можно было попробовать снова (например, перезагрузкой)
+        if(sentinel) sentinel.remove();
     } finally {
         isLoading = false;
     }
