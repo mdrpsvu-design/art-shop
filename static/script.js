@@ -15,32 +15,29 @@ const HERO_IMAGES = [
 ];
 
 function initHeroSlideshow() {
-    const container = document.getElementById('hero-slideshow-container');
-    if (!container) return;
+    const track = document.getElementById('hero-marquee-track');
+    if (!track) return;
 
-    // 1. Создаем HTML для картинок
-    container.innerHTML = HERO_IMAGES.map((imgName, index) => `
-        <img src="/static/${imgName}" 
-             class="hero-slide-img ${index === 0 ? 'active' : ''}" 
-             alt="Мастер ${index + 1}">
-    `).join('');
+    // Генерируем HTML одной картинки
+    const createImgHTML = (src) => `<img src="/static/${src}" class="marquee-img" alt="Work">`;
 
-    // 2. Запускаем интервал смены
-    let currentIndex = 0;
-    const slides = container.querySelectorAll('.hero-slide-img');
+    // 1. Создаем список картинок
+    const imagesHTML = HERO_IMAGES.map(img => createImgHTML(img)).join('');
+
+    // 2. Вставляем ДВАЖДЫ. 
+    // Это секрет бесконечной прокрутки: [Набор 1] [Набор 2]
+    // Анимация CSS прокрутит ровно половину длины (один набор), 
+    // и мгновенно вернется в начало, где стоит визуально идентичный [Набор 1].
     
-    if (slides.length > 1) {
-        setInterval(() => {
-            // Убираем класс active у текущей
-            slides[currentIndex].classList.remove('active');
-            
-            // Вычисляем следующий индекс
-            currentIndex = (currentIndex + 1) % slides.length;
-            
-            // Добавляем класс active следующей
-            slides[currentIndex].classList.add('active');
-        }, 5000); // Смена каждые 5 секунд (5000 мс)
+    // Если картинок мало (меньше 4), можно продублировать их 4 раза, чтобы заполнить экран
+    const repeatCount = HERO_IMAGES.length < 4 ? 4 : 2; 
+    
+    let content = '';
+    for(let i=0; i < repeatCount; i++) {
+        content += imagesHTML;
     }
+    
+    track.innerHTML = content;
 }
 
 // Observer'ы

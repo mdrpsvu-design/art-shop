@@ -96,9 +96,7 @@ body {
     padding: 0 20px; 
     align-items: center; 
     scrollbar-width: none;
-    /* Гарантируем центровку */
-    justify-content: center; 
-    /* Растягиваем на всю ширину, чтобы justify-content работал корректно */
+    justify-content: center;
     width: 100%; 
 }
 .nav-inner::-webkit-scrollbar { display: none; }
@@ -155,31 +153,83 @@ body {
 }
 
 /* --- HERO --- */
-.hero-section { background: linear-gradient(to bottom, #fffcf5, #fff); }
+.hero-section { 
+    background: linear-gradient(to bottom, #fffcf5, #fff); 
+    overflow: hidden; /* Важно, чтобы лента не вылезала за пределы экрана */
+}
 .hero-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Текст слева, фото справа */
+    /* Убрали space-between, теперь управляем отступами через gap */
+    gap: 60px; 
     width: 100%;
-    max-width: 1300px; /* Увеличили ширину контейнера */
-    padding: 0 50px; /* Отступы по краям */
-    gap: 40px; /* Уменьшили дырку между текстом и фото */
+    max-width: 1400px; /* Широкий контейнер */
+    padding: 0 50px;
+    height: 100%; /* На всю высоту секции */
 }
 .hero-text { 
-    flex: 1.5; 
+    flex: 0 0 auto; /* Не растягиваемся, занимаем свой размер */
+    width: 40%; /* Текст занимает 40% ширины */
     opacity: 0; 
     transform: translateY(30px); 
     transition: 1s ease 0.5s; 
-    /* Выравнивание текста слева */
     text-align: left; 
-    padding-right: 20px;
+    z-index: 2; /* Текст поверх картинок, если вдруг наедут */
 }
 .hero-text.visible { opacity: 1; transform: translateY(0); }
 
-.hero-text h1 { font-size: 4.5rem; margin: 0 0 15px; font-weight: 300; line-height: 1; font-style: italic; }
-.subtitle { font-size: 1.1rem; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 30px; }
+.hero-text h1 { font-size: 4rem; margin: 0 0 20px; font-weight: 300; line-height: 1.1; font-style: italic; }
+.subtitle { font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 30px; }
 .separator { width: 60px; height: 1px; background: var(--accent); margin-bottom: 30px; }
-.bio { font-size: 1.2rem; line-height: 1.6; color: #555; max-width: 550px; }
+.bio { font-size: 1.1rem; line-height: 1.6; color: #555; max-width: 450px; }
+
+.hero-marquee-box {
+    flex: 1; /* Занимает все оставшееся место справа */
+    height: 100%;
+    display: flex;
+    align-items: center; /* Центрируем ленту по вертикали */
+    opacity: 0;
+    transition: 1.5s ease;
+    
+    /* Маска, чтобы края плавно исчезали (опционально, красиво смотрится) */
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+.hero-marquee-box.visible { opacity: 1; }
+
+.marquee-window {
+    width: 100%;
+    overflow: hidden; /* Скрываем все, что вылезло за границы блока */
+    position: relative;
+}
+
+.marquee-track {
+    display: flex;
+    gap: 30px; /* Расстояние между картинками */
+    width: max-content; /* Ширина равна содержимому */
+    
+    /* Анимация: двигаем влево бесконечно */
+    animation: marquee-scroll 40s linear infinite; 
+}
+
+/* Сами картинки */
+.marquee-img {
+    height: 400px; /* УМЕНЬШИЛИ высоту (было 550px) */
+    width: auto;   /* Ширина подстроится под пропорции */
+    border-radius: 8px;
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.1);
+    object-fit: cover;
+    flex-shrink: 0; /* Чтобы картинки не сжимались */
+}
+
+/* Ключевые кадры анимации */
+@keyframes marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } 
+    /* Двигаем на -50%, так как JS дублирует контент. 
+       Когда доходим до середины (конец первого набора), 
+       анимация сбрасывается в 0, создавая бесшовный цикл. */
+}
 
 .hero-image-box { 
     flex: 1; 
@@ -379,12 +429,12 @@ body {
         height: 100%; 
     }
 
-    /* --- ГЛАВНЫЙ ЭКРАН (HERO) - Исправление --- */
-    .hero-wrapper { 
-        justify-content: flex-start; /* Прижимаем к верху */
-        padding-top: 80px; /* Отступ от шапки */
-        gap: 5px; /* Минимальный зазор между фото и текстом */
-    } 
+    .hero-wrapper {
+        flex-direction: column;
+        justify-content: center;
+        padding-top: 100px;
+        gap: 30px;
+    }
     
     .hero-image-box { 
         margin-bottom: 5px; 
@@ -401,14 +451,27 @@ body {
     }
     
     .hero-text {
-        flex: 0 0 auto; /* Текст занимает ровно столько места, сколько нужно */
+        width: 100%;
+        text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    /* Уплотняем текст, чтобы всё влезло */
-    .hero-text h1 { font-size: 2rem; margin: 0 0 5px 0; line-height: 1.1; }
+    .hero-text h1 { font-size: 2.5rem; }
+
+    .hero-marquee-box {
+        width: 100vw; /* На всю ширину экрана телефона */
+        margin-left: -20px; /* Компенсация padding родителя */
+        margin-right: -20px;
+        mask-image: none; /* На телефоне убираем маску по краям */
+        -webkit-mask-image: none;
+    }
+    
+    .marquee-img {
+        height: 250px; /* На телефоне картинки еще меньше */
+    }
+
     .subtitle { margin-bottom: 10px; font-size: 0.85rem; margin-top: 0; }
     .separator { margin-bottom: 10px; width: 40px; } /* Чуть меньше отступ */
     .bio { font-size: 0.95rem; margin-bottom: 5px; line-height: 1.4; }

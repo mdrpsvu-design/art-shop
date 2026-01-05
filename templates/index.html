@@ -41,9 +41,12 @@
         <!-- Hero Section -->
         <section class="slide-section hero-section" id="hero-section" data-cat="all">
             <div class="content-wrapper hero-wrapper">
+                
+                <!-- Левая часть: Текст -->
                 <div class="hero-text reveal-element">
                     <h1>Искусство,<br>согревающее душу</h1>
-                    <p class="subtitle">Авторская мастерская</p>
+                    <!-- ОБНОВЛЕННЫЙ ПОДЗАГОЛОВОК -->
+                    <p class="subtitle">Авторская мастерская Ольги Мартьяновой</p>
                     <div class="separator"></div>
                     <p class="bio">Традиции в современном прочтении. Каждая работа уникальна.</p>
                     
@@ -53,10 +56,15 @@
                     </div>
                 </div>
                 
-                <!-- ИЗМЕНЕНИЕ: Пустой контейнер с ID для JS -->
-                <div class="hero-image-box reveal-element delay-100" id="hero-slideshow-container">
-                    <!-- JS вставит сюда картинки -->
+                <!-- Правая часть: Бегущая строка -->
+                <div class="hero-marquee-box reveal-element delay-100">
+                    <!-- Обертка, скрывающая лишнее -->
+                    <div class="marquee-window">
+                        <!-- Длинная лента с картинками (генерируется JS) -->
+                        <div class="marquee-track" id="hero-marquee-track"></div>
+                    </div>
                 </div>
+
             </div>
         </section>
 
