@@ -21,23 +21,18 @@ function initHeroSlideshow() {
     // Генерируем HTML одной картинки
     const createImgHTML = (src) => `<img src="/static/${src}" class="marquee-img" alt="Work">`;
 
-    // 1. Создаем список картинок
-    const imagesHTML = HERO_IMAGES.map(img => createImgHTML(img)).join('');
-
-    // 2. Вставляем ДВАЖДЫ. 
-    // Это секрет бесконечной прокрутки: [Набор 1] [Набор 2]
-    // Анимация CSS прокрутит ровно половину длины (один набор), 
-    // и мгновенно вернется в начало, где стоит визуально идентичный [Набор 1].
-    
-    // Если картинок мало (меньше 4), можно продублировать их 4 раза, чтобы заполнить экран
-    const repeatCount = HERO_IMAGES.length < 4 ? 4 : 2; 
-    
-    let content = '';
-    for(let i=0; i < repeatCount; i++) {
-        content += imagesHTML;
+    // 1. Создаем длинную полоску картинок (повторяем исходные 6 раз)
+    // Это нужно, чтобы заполнить ширину любого экрана
+    const baseImages = HERO_IMAGES.map(img => createImgHTML(img)).join('');
+    let longStrip = '';
+    for(let i=0; i < 6; i++) {
+        longStrip += baseImages;
     }
-    
-    track.innerHTML = content;
+
+    // 2. Вставляем эту полоску ДВАЖДЫ.
+    // Анимация сдвигает ленту на 50%. Когда первая половина уезжает, 
+    // вторая встает ровно на её место.
+    track.innerHTML = longStrip + longStrip;
 }
 
 // Observer'ы
