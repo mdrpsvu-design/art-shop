@@ -410,155 +410,137 @@ body {
     bottom: 50px; /* Небольшая анимация вверх при появлении */
 }
 
-/* --- MOBILE ADAPTATION (ЗАМЕНИТЕ ВЕСЬ БЛОК В КОНЦЕ ФАЙЛА) --- */
+/* --- МОБИЛЬНАЯ ВЕРСИЯ (Вставьте это в конец style.css) --- */
 @media (max-width: 900px) {
     :root { 
-        --top-offset: 70px; /* Уменьшаем базовый отступ */
+        --header-height: 60px; /* Чуть компактнее шапка */
+        --nav-height: 40px;    /* Чуть компактнее меню */
     } 
-    
-    .top-bar, .category-nav {
-        width: 100%;
-        padding: 0 1rem; /* Чуть меньше отступы по бокам */
-    }
 
-    .logo { font-size: 1.4rem; letter-spacing: 1px; }
+    .top-bar, .category-nav { width: 100%; padding: 0 15px; }
+    .logo { font-size: 1.4rem; }
     .logo-full { display: none; }
     .logo-short { display: inline; }
-    .contact-trigger { font-size: 0.75rem; } /* Уменьшаем шрифт кнопки */
-    .search-box input { width: 70px; font-size: 0.8rem; }
+    .search-box input { width: 80px; }
 
-    /* --- HERO SECTION ИСПРАВЛЕНИЯ --- */
+    /* 1. Настройка главного экрана */
     .hero-section {
-        height: 100vh;
-        /* Решает проблему с адресной строкой в моб. браузерах */
-        height: 100dvh; 
-        padding-top: 0;
-        align-items: flex-start; /* Прижимаем к верху, а не по центру */
+        height: 100dvh; /* Высота экрана с учетом мобильных браузеров */
+        min-height: 500px; /* Чтобы на совсем мелких не сжалось в ноль */
+        padding: 0;
+        align-items: flex-start;
+        overflow: hidden; /* Обрезаем всё лишнее */
     }
 
     .hero-wrapper {
-        flex-direction: column;
-        justify-content: flex-start; /* Контент идет сверху вниз */
-        padding-top: calc(var(--header-height) + var(--nav-height) + 10px); /* Отступ ровно под меню */
-        padding-bottom: 20px;
-        gap: 15px; /* Маленький зазор между блоками */
-        text-align: center;
-        height: 100%; 
-        width: 100%;
+        flex-direction: column; /* Элементы друг под другом */
+        justify-content: flex-start;
+        /* Отступ сверху = высота шапки + меню + небольшой зазор */
+        padding-top: calc(var(--header-height) + var(--nav-height) + 10px);
+        padding-bottom: 20px; /* Отступ снизу экрана */
+        padding-left: 20px;
+        padding-right: 20px;
         box-sizing: border-box;
+        width: 100%;
+        height: 100%; /* Занимаем всю высоту */
+        gap: 0; /* Убираем лишние зазоры, будем управлять через flex */
     }
     
-    /* БЕГУЩАЯ СТРОКА */
+    /* 2. БЛОК С КАРТИНКАМИ (СВЕРХУ) */
     .hero-marquee-box { 
-        order: -1; /* Картинки сверху */
-        flex: 0 0 auto; 
-        width: 100vw; /* На всю ширину экрана */
-        margin-left: -20px; /* Компенсация padding родителя */
+        order: -1; /* Ставим визуально ПЕРВЫМ */
+        flex: 0 0 35%; /* Жестко: занимает ровно 35% высоты контейнера */
+        width: 100vw; /* На всю ширину */
+        margin-left: -20px; /* Компенсация отступов родителя */
         margin-right: -20px;
-        margin-bottom: 0;
-        opacity: 1 !important; /* Принудительно показываем, если JS тормозит */
+        margin-bottom: 15px; /* Отступ до текста */
         
-        /* Исправление "дерганой" анимации */
-        transform: translateZ(0); 
+        /* Исправление видимости и анимации */
+        opacity: 1 !important; 
+        transform: none !important;
         will-change: transform;
     }
     
     .marquee-window {
-        /* Маска для красивого исчезновения по краям */
-        mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-        -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        height: 100%; /* Окно занимает все 35% высоты */
+    }
+
+    .marquee-track {
+        height: 100%;
+        align-items: center; /* Центрируем картинки по вертикали в их блоке */
     }
 
     .marquee-img {
-        /* Высота зависит от экрана: не больше 28% высоты */
-        height: 28vh; 
-        max-height: 220px; /* И не больше 220px */
-        min-height: 150px;
-        width: auto;
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.1); /* Тень поменьше */
+        height: 100%; /* Картинка растягивается на всю высоту блока */
+        max-height: 250px; /* Ограничитель, чтобы качество не плыло */
+        width: auto; /* Ширина авто */
+        object-fit: contain; /* Чтобы картинка влезала целиком */
+        box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
     }
 
-    /* ТЕКСТ */
+    /* 3. БЛОК С ТЕКСТОМ (СНИЗУ) */
     .hero-text {
+        flex: 1; /* Занимает ВСЁ оставшееся пространство (оставшиеся ~60%) */
         width: 100%;
-        flex: 1; /* Занимает оставшееся место */
         display: flex;
         flex-direction: column;
+        /* Распределяем контент: Заголовок вверху, кнопка прижата к низу */
+        justify-content: space-between; 
         align-items: center;
-        justify-content: center; /* Центрируем текст в его блоке */
-        opacity: 1 !important; /* Принудительно показываем */
+        text-align: center;
+        
+        /* Принудительно показываем текст */
+        opacity: 1 !important;
         transform: none !important;
         padding-bottom: 10px;
     }
 
+    /* Группируем верхнюю часть текста, чтобы она была вместе */
+    .hero-text-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
     .hero-text h1 { 
-        font-size: 2.2rem; /* Уменьшили шрифт */
-        margin-bottom: 10px;
+        font-size: 2rem; /* Шрифт чуть меньше */
+        margin: 0 0 10px 0;
         line-height: 1.1;
     }
 
     .subtitle { 
-        font-size: 0.75rem; 
-        margin-bottom: 10px; 
+        font-size: 0.7rem; 
+        margin-bottom: 10px;
+        display: block; 
     }
     
-    .separator { 
-        margin-bottom: 10px; 
-        width: 30px; 
-    } 
+    .separator { margin-bottom: 10px; width: 30px; } 
     
     .bio { 
         font-size: 0.9rem; 
-        margin-bottom: 10px; 
+        margin-bottom: 0; 
         line-height: 1.3;
-        max-width: 90%; /* Чтобы текст не прилипал к краям */
+        max-width: 100%;
     }
     
+    /* Кнопка "Смотреть" прижимается к самому низу */
     .scroll-hint { 
-        margin-top: auto; /* Прижимаем кнопку к низу блока текста */
-        margin-bottom: 10px;
-        transform: scale(0.9); /* Чуть уменьшаем кнопку */
+        margin-top: auto; 
+        margin-bottom: 0;
+        transform: scale(0.9);
     }
 
-    /* --- КАРТОЧКА ТОВАРА (ОСТАЛЬНОЕ) --- */
+    /* --- ОСТАЛЬНЫЕ БЛОКИ (ТОВАРЫ) --- */
     .content-wrapper:not(.hero-wrapper) {
         flex-direction: column;
         justify-content: center;
-        padding: 0 20px;
         gap: 15px;
-        text-align: center;
-    }
-
-    .art-left-col {
-        flex: 0 0 auto; 
-        margin-bottom: 5px;
+        padding: 0 20px;
     }
     
-    .art-right-col {
-        flex: 0 0 auto; 
-        width: 100%;
-        opacity: 1 !important; 
-        transform: none !important;
-    }
-    
-    .art-img-container {
-        padding: 0; box-shadow: none; background: transparent;
-    }
-
-    .art-img { 
-        max-height: 40vh; /* Картинка товара не перекрывает весь экран */
-        max-width: 100%; 
-    }
-    
-    .art-title { font-size: 1.8rem; margin-bottom: 5px; }
-    .art-price { font-size: 1.4rem; margin-bottom: 15px; }
-    .btn-group { margin-top: 5px; }
-    
-    .modal-box {
-        margin: 15vh auto;
-        width: 85%;
-        padding: 20px;
-    }
+    .art-left-col, .art-right-col { width: 100%; flex: auto; opacity: 1 !important; transform: none !important;}
+    .art-img { max-height: 40vh; }
+    .art-title { font-size: 1.8rem; }
 }
 
 /* --- CUSTOM SCROLLBAR --- */
