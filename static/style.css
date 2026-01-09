@@ -410,131 +410,154 @@ body {
     bottom: 50px; /* Небольшая анимация вверх при появлении */
 }
 
-/* --- MOBILE ADAPTATION --- */
+/* --- MOBILE ADAPTATION (ЗАМЕНИТЕ ВЕСЬ БЛОК В КОНЦЕ ФАЙЛА) --- */
 @media (max-width: 900px) {
-    :root { --top-offset: 80px; } 
+    :root { 
+        --top-offset: 70px; /* Уменьшаем базовый отступ */
+    } 
     
     .top-bar, .category-nav {
         width: 100%;
+        padding: 0 1rem; /* Чуть меньше отступы по бокам */
     }
 
     .logo { font-size: 1.4rem; letter-spacing: 1px; }
     .logo-full { display: none; }
     .logo-short { display: inline; }
-    .contact-trigger { font-size: 0.8rem; }
-    .search-box input { width: 80px; }
+    .contact-trigger { font-size: 0.75rem; } /* Уменьшаем шрифт кнопки */
+    .search-box input { width: 70px; font-size: 0.8rem; }
 
-    /* --- ОБЩИЙ КОНТЕЙНЕР --- */
-    .content-wrapper {
-        flex-direction: column;
-        justify-content: center; /* Центрирует товары */
-        padding: 0 20px;
-        gap: 10px; /* Уменьшили общий зазор */
-        text-align: center;
-        height: 100%; 
+    /* --- HERO SECTION ИСПРАВЛЕНИЯ --- */
+    .hero-section {
+        height: 100vh;
+        /* Решает проблему с адресной строкой в моб. браузерах */
+        height: 100dvh; 
+        padding-top: 0;
+        align-items: flex-start; /* Прижимаем к верху, а не по центру */
     }
 
     .hero-wrapper {
         flex-direction: column;
-        justify-content: center;
-        padding-top: 100px;
-        gap: 30px;
+        justify-content: flex-start; /* Контент идет сверху вниз */
+        padding-top: calc(var(--header-height) + var(--nav-height) + 10px); /* Отступ ровно под меню */
+        padding-bottom: 20px;
+        gap: 15px; /* Маленький зазор между блоками */
+        text-align: center;
+        height: 100%; 
+        width: 100%;
+        box-sizing: border-box;
     }
     
-    .hero-image-box { 
-        margin-bottom: 5px; 
-        order: -1; /* Картинка сверху */
-        flex: 0 0 auto; /* Не сжимать и не растягивать блок фото */
+    /* БЕГУЩАЯ СТРОКА */
+    .hero-marquee-box { 
+        order: -1; /* Картинки сверху */
+        flex: 0 0 auto; 
+        width: 100vw; /* На всю ширину экрана */
+        margin-left: -20px; /* Компенсация padding родителя */
+        margin-right: -20px;
+        margin-bottom: 0;
+        opacity: 1 !important; /* Принудительно показываем, если JS тормозит */
+        
+        /* Исправление "дерганой" анимации */
+        transform: translateZ(0); 
+        will-change: transform;
     }
     
+    .marquee-window {
+        /* Маска для красивого исчезновения по краям */
+        mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    }
+
+    .marquee-img {
+        /* Высота зависит от экрана: не больше 28% высоты */
+        height: 28vh; 
+        max-height: 220px; /* И не больше 220px */
+        min-height: 150px;
+        width: auto;
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.1); /* Тень поменьше */
+    }
+
+    /* ТЕКСТ */
     .hero-text {
         width: 100%;
-        text-align: center;
+        flex: 1; /* Занимает оставшееся место */
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center; /* Центрируем текст в его блоке */
+        opacity: 1 !important; /* Принудительно показываем */
+        transform: none !important;
+        padding-bottom: 10px;
     }
 
-    .hero-text h1 { font-size: 2.5rem; }
+    .hero-text h1 { 
+        font-size: 2.2rem; /* Уменьшили шрифт */
+        margin-bottom: 10px;
+        line-height: 1.1;
+    }
 
-    .hero-marquee-box { 
-        margin-bottom: 5px; 
-        order: -1; /* Картинка сверху */
-        flex: 0 0 auto; 
-        width: 100vw; /* На всю ширину */
-        margin-left: -20px;
-        margin-right: -20px;
+    .subtitle { 
+        font-size: 0.75rem; 
+        margin-bottom: 10px; 
     }
     
-    .marquee-img {
-        height: 250px; /* На телефоне картинки еще меньше */
-    }
-
-    .subtitle { margin-bottom: 10px; font-size: 0.85rem; margin-top: 0; }
-    .separator { margin-bottom: 10px; width: 40px; } /* Чуть меньше отступ */
-    .bio { font-size: 0.95rem; margin-bottom: 5px; line-height: 1.4; }
+    .separator { 
+        margin-bottom: 10px; 
+        width: 30px; 
+    } 
     
-    /* Самое важное: поднимаем кнопку "Смотреть" */
+    .bio { 
+        font-size: 0.9rem; 
+        margin-bottom: 10px; 
+        line-height: 1.3;
+        max-width: 90%; /* Чтобы текст не прилипал к краям */
+    }
+    
     .scroll-hint { 
-        margin-top: 15px; /* БЫЛО 50px -> СТАЛО 15px */
+        margin-top: auto; /* Прижимаем кнопку к низу блока текста */
+        margin-bottom: 10px;
+        transform: scale(0.9); /* Чуть уменьшаем кнопку */
     }
 
-    /* --- КАРТОЧКА ТОВАРА (оставляем как было, там всё хорошо) --- */
+    /* --- КАРТОЧКА ТОВАРА (ОСТАЛЬНОЕ) --- */
+    .content-wrapper:not(.hero-wrapper) {
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 20px;
+        gap: 15px;
+        text-align: center;
+    }
+
     .art-left-col {
         flex: 0 0 auto; 
-        height: auto; 
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
     
     .art-right-col {
         flex: 0 0 auto; 
-        justify-content: flex-start; 
-        transform: none; opacity: 1; 
         width: 100%;
+        opacity: 1 !important; 
+        transform: none !important;
     }
     
     .art-img-container {
-        padding: 0; 
-        box-shadow: none; 
-        background: transparent;
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
+        padding: 0; box-shadow: none; background: transparent;
     }
 
     .art-img { 
-        max-height: 45vh; 
+        max-height: 40vh; /* Картинка товара не перекрывает весь экран */
         max-width: 100%; 
-        width: auto;
     }
     
-    .art-title { font-size: 1.6rem; margin-bottom: 5px; line-height: 1.2; }
-    .art-price { font-size: 1.3rem; margin-bottom: 15px; }
-    .art-cat { margin-bottom: 5px; font-size: 0.7rem; }
+    .art-title { font-size: 1.8rem; margin-bottom: 5px; }
+    .art-price { font-size: 1.4rem; margin-bottom: 15px; }
+    .btn-group { margin-top: 5px; }
     
-    .btn-group { width: 100%; gap: 10px; margin-top: 5px; }
-    .action-btn { 
-        flex: 1; 
-        width: auto; 
-        min-width: 0; 
-        padding: 12px 0; 
-        font-size: 0.75rem; 
-    }
-    
-    .nav-arrow { width: 35px; height: 35px; background: rgba(255,255,255,0.8); }
-    .prev-arrow { left: 0; }
-    .next-arrow { right: 0; }
-
     .modal-box {
-        margin: 10vh auto;
-        width: 90%;
-        padding: 25px;
-        max-height: 80vh; 
-        overflow-y: auto;
+        margin: 15vh auto;
+        width: 85%;
+        padding: 20px;
     }
 }
 
