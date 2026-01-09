@@ -421,18 +421,18 @@ body {
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* === ГЛАВНЫЙ ЭКРАН (HERO) === */
+    /* === ГЛАВНЫЙ ЭКРАН === */
     .hero-section {
-        height: 100dvh; /* Высота экрана */
+        height: 100dvh; 
         padding: 0;
         align-items: flex-start;
-        overflow: hidden; /* Обрезаем всё, что вылезает */
+        overflow: hidden;
     }
 
     .hero-wrapper {
-        flex-direction: column; /* Вертикальный столб */
+        flex-direction: column;
         justify-content: flex-start;
-        padding-top: 120px; /* Отступ под шапку */
+        padding-top: 120px;
         padding-bottom: 20px;
         gap: 0;
         text-align: center;
@@ -441,55 +441,66 @@ body {
         box-sizing: border-box;
     }
     
-    /* 1. БЛОК С ФОТОГРАФИЯМИ (ВЕРХНЯЯ ЧАСТЬ) */
+    /* 1. БЛОК С ФОТОГРАФИЯМИ */
     .hero-marquee-box { 
-        order: -1; /* Ставим в начало */
-        
-        /* ЗАПРЕЩАЕМ БЫТЬ ВО ВЕСЬ ЭКРАН: */
-        flex: 0 0 35vh !important; /* Ровно 35% высоты экрана */
-        height: 35vh !important;
+        order: -1; 
+        /* Жесткая высота блока */
+        flex: 0 0 35vh !important; 
+        height: 35vh !important; 
+        min-height: 200px; /* Чтобы совсем не сплющило на старых айфонах */
         
         width: 100vw; 
         margin-left: -20px; 
         margin-right: -20px;
         margin-bottom: 15px;
         
-        /* ЗАПРЕЩАЕМ ИСЧЕЗАТЬ/МОРГАТЬ: */
+        /* ВАЖНО: Убираем маску (градиент по краям), так как она может скрывать всё */
+        mask-image: none !important;
+        -webkit-mask-image: none !important;
+        
+        /* Принудительный показ */
         opacity: 1 !important;
         visibility: visible !important;
         transform: none !important;
-        transition: none !important;
+        background: transparent; /* На случай если был фон */
     }
-    
+
+    /* !!! ВОТ РЕШЕНИЕ ПРОБЛЕМЫ ИСЧЕЗНОВЕНИЯ !!! */
+    /* Внутреннее окно должно растянуться на высоту родителя */
+    .marquee-window {
+        height: 100% !important;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Трек с картинками тоже должен быть во всю высоту */
     .marquee-track {
-        /* Принудительно включаем анимацию */
-        animation: marquee-scroll 30s linear infinite !important;
+        height: 100% !important;
         display: flex;
-        align-items: center;
-        height: 100%;
+        align-items: center; /* Центрируем фото по вертикали */
+        animation: marquee-scroll 25s linear infinite !important;
     }
 
     .marquee-img {
-        /* Картинка подстраивается под высоту блока (35vh) */
-        height: 100%; 
-        width: auto;
+        height: 100% !important; /* Картинка занимает всю высоту блока */
+        width: auto; /* Ширина авто (сохраняем пропорции) */
         object-fit: cover;
+        box-shadow: none; /* Убираем лишние тени */
     }
 
-    /* 2. БЛОК С ТЕКСТОМ (НИЖНЯЯ ЧАСТЬ) */
+    /* 2. БЛОК С ТЕКСТОМ */
     .hero-text {
         width: 100%;
-        flex: 1; /* Занимает всё оставшееся место */
-        
+        flex: 1; 
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* Текст - сверху, кнопка - снизу */
+        justify-content: space-between; 
         align-items: center;
         
-        /* ЗАПРЕЩАЕМ ИСЧЕЗАТЬ: */
         opacity: 1 !important;
         visibility: visible !important;
         transform: none !important;
+        z-index: 10; /* Поднимаем текст над всем остальным */
     }
 
     .hero-text h1 { 
@@ -502,11 +513,11 @@ body {
     .bio { font-size: 0.95rem; margin: 0; }
     
     .scroll-hint { 
-        margin-top: auto; /* Прижимаем к низу */
+        margin-top: auto; 
         transform: scale(0.9);
     }
 
-    /* === ОСТАЛЬНОЙ КОД ДЛЯ КАРТОЧЕК (НЕ ИЗМЕНЯЛСЯ) === */
+    /* === ОСТАЛЬНОЕ (КАРТОЧКИ) === */
     .content-wrapper:not(.hero-wrapper) {
         flex-direction: column;
         justify-content: center;

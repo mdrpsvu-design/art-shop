@@ -19,19 +19,18 @@ function initHeroSlideshow() {
     if (!track) return;
 
     // Генерируем HTML одной картинки
+    // ВАЖНО: Убедитесь, что картинки mom.jpg, mom1.jpg и т.д. существуют в папке static
     const createImgHTML = (src) => `<img src="/static/${src}" class="marquee-img" alt="Work">`;
 
-    // 1. Создаем длинную полоску картинок (повторяем исходные 6 раз)
-    // Это нужно, чтобы заполнить ширину любого экрана
     const baseImages = HERO_IMAGES.map(img => createImgHTML(img)).join('');
+    
+    // Создаем длинную ленту (повторяем 6 раз для надежности)
     let longStrip = '';
     for(let i=0; i < 6; i++) {
         longStrip += baseImages;
     }
 
-    // 2. Вставляем эту полоску ДВАЖДЫ.
-    // Анимация сдвигает ленту на 50%. Когда первая половина уезжает, 
-    // вторая встает ровно на её место.
+    // Дублируем ленту для бесконечной прокрутки
     track.innerHTML = longStrip + longStrip;
 }
 
