@@ -413,8 +413,8 @@ body {
 /* --- МОБИЛЬНАЯ ВЕРСИЯ (Вставьте это в конец style.css) --- */
 @media (max-width: 900px) {
     :root { 
-        --header-height: 60px; /* Чуть компактнее шапка */
-        --nav-height: 40px;    /* Чуть компактнее меню */
+        --header-height: 60px;
+        --nav-height: 45px; /* Чуть больше места для меню */
     } 
 
     .top-bar, .category-nav { width: 100%; padding: 0 15px; }
@@ -423,124 +423,123 @@ body {
     .logo-short { display: inline; }
     .search-box input { width: 80px; }
 
-    /* 1. Настройка главного экрана */
+    /* ГЛАВНЫЙ ЭКРАН */
     .hero-section {
-        height: 100dvh; /* Высота экрана с учетом мобильных браузеров */
-        min-height: 500px; /* Чтобы на совсем мелких не сжалось в ноль */
+        height: 100dvh; 
+        min-height: 550px; /* Увеличили минимальную высоту */
         padding: 0;
         align-items: flex-start;
-        overflow: hidden; /* Обрезаем всё лишнее */
+        overflow: hidden;
     }
 
     .hero-wrapper {
-        flex-direction: column; /* Элементы друг под другом */
+        flex-direction: column;
         justify-content: flex-start;
-        /* Отступ сверху = высота шапки + меню + небольшой зазор */
-        padding-top: calc(var(--header-height) + var(--nav-height) + 10px);
-        padding-bottom: 20px; /* Отступ снизу экрана */
-        padding-left: 20px;
-        padding-right: 20px;
-        box-sizing: border-box;
+        /* Отступ сверху чуть меньше, чтобы дать место контенту */
+        padding-top: calc(var(--header-height) + var(--nav-height) + 5px);
+        padding-bottom: 20px;
+        padding-left: 15px;
+        padding-right: 15px;
         width: 100%;
-        height: 100%; /* Занимаем всю высоту */
-        gap: 0; /* Убираем лишние зазоры, будем управлять через flex */
+        height: 100%;
+        gap: 0;
     }
     
-    /* 2. БЛОК С КАРТИНКАМИ (СВЕРХУ) */
+    /* --- БЛОК С КАРТИНКАМИ (35% экрана) --- */
     .hero-marquee-box { 
-        order: -1; /* Ставим визуально ПЕРВЫМ */
-        flex: 0 0 35%; /* Жестко: занимает ровно 35% высоты контейнера */
-        width: 100vw; /* На всю ширину */
-        margin-left: -20px; /* Компенсация отступов родителя */
-        margin-right: -20px;
-        margin-bottom: 15px; /* Отступ до текста */
+        order: -1; 
+        flex: 0 0 35%; /* Фиксированная высота */
+        width: 100vw; 
+        margin-left: -15px; 
+        margin-right: -15px;
+        margin-bottom: 10px;
         
-        /* Исправление видимости и анимации */
+        /* !!! ВАЖНО: Отключаем JS-эффекты появления !!! */
         opacity: 1 !important; 
-        transform: none !important;
-        will-change: transform;
+        transform: none !important; 
+        transition: none !important;
+        mask-image: none !important; /* Убираем маску, если она тормозит */
     }
     
     .marquee-window {
-        height: 100%; /* Окно занимает все 35% высоты */
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
     }
 
     .marquee-track {
         height: 100%;
-        align-items: center; /* Центрируем картинки по вертикали в их блоке */
+        display: flex;
+        align-items: center;
+        gap: 15px; /* Зазор между фото */
+        
+        /* Принудительный запуск анимации */
+        width: max-content;
+        animation: marquee-scroll 20s linear infinite !important; /* Быстрее (20s) и важно (!important) */
     }
 
     .marquee-img {
-        height: 100%; /* Картинка растягивается на всю высоту блока */
-        max-height: 250px; /* Ограничитель, чтобы качество не плыло */
-        width: auto; /* Ширина авто */
-        object-fit: contain; /* Чтобы картинка влезала целиком */
-        box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
+        height: 100%; 
+        max-height: 250px; 
+        width: auto; 
+        object-fit: cover; /* Cover лучше заполняет пространство */
+        border-radius: 6px;
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
     }
 
-    /* 3. БЛОК С ТЕКСТОМ (СНИЗУ) */
+    /* --- БЛОК С ТЕКСТОМ (65% экрана) --- */
     .hero-text {
-        flex: 1; /* Занимает ВСЁ оставшееся пространство (оставшиеся ~60%) */
+        flex: 1; 
         width: 100%;
         display: flex;
         flex-direction: column;
-        /* Распределяем контент: Заголовок вверху, кнопка прижата к низу */
-        justify-content: space-between; 
+        justify-content: space-between; /* Раскидываем верх и низ */
         align-items: center;
         text-align: center;
         
-        /* Принудительно показываем текст */
+        /* Отключаем JS-задержки */
         opacity: 1 !important;
         transform: none !important;
+        transition: none !important;
         padding-bottom: 10px;
     }
 
-    /* Группируем верхнюю часть текста, чтобы она была вместе */
-    .hero-text-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
     .hero-text h1 { 
-        font-size: 2rem; /* Шрифт чуть меньше */
-        margin: 0 0 10px 0;
-        line-height: 1.1;
+        font-size: 2.4rem; /* УВЕЛИЧИЛИ ШРИФТ */
+        margin: 5px 0 10px 0;
+        line-height: 1.05;
+        font-weight: 400;
     }
 
     .subtitle { 
-        font-size: 0.7rem; 
+        font-size: 0.85rem; /* УВЕЛИЧИЛИ ПОДЗАГОЛОВОК */
         margin-bottom: 10px;
-        display: block; 
+        letter-spacing: 1px;
+        color: #777;
     }
     
-    .separator { margin-bottom: 10px; width: 30px; } 
+    .separator { margin-bottom: 10px; width: 40px; height: 2px; } 
     
     .bio { 
-        font-size: 0.9rem; 
+        font-size: 1rem; /* УВЕЛИЧИЛИ ТЕКСТ ОПИСАНИЯ */
         margin-bottom: 0; 
-        line-height: 1.3;
+        line-height: 1.35;
+        color: #444;
         max-width: 100%;
     }
     
-    /* Кнопка "Смотреть" прижимается к самому низу */
+    /* Кнопка в самом низу */
     .scroll-hint { 
         margin-top: auto; 
-        margin-bottom: 0;
-        transform: scale(0.9);
-    }
-
-    /* --- ОСТАЛЬНЫЕ БЛОКИ (ТОВАРЫ) --- */
-    .content-wrapper:not(.hero-wrapper) {
-        flex-direction: column;
-        justify-content: center;
-        gap: 15px;
-        padding: 0 20px;
+        margin-bottom: 5px;
+        transform: scale(1); /* Вернули нормальный размер кнопки */
     }
     
-    .art-left-col, .art-right-col { width: 100%; flex: auto; opacity: 1 !important; transform: none !important;}
-    .art-img { max-height: 40vh; }
-    .art-title { font-size: 1.8rem; }
+    /* --- ОСТАЛЬНЫЕ БЛОКИ --- */
+    .content-wrapper:not(.hero-wrapper) {
+        padding: 0 15px;
+    }
+    .art-title { font-size: 2rem; } /* Чуть крупнее название товаров */
 }
 
 /* --- CUSTOM SCROLLBAR --- */

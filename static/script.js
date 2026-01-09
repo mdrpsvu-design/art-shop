@@ -21,20 +21,21 @@ function initHeroSlideshow() {
     // Генерируем HTML одной картинки
     const createImgHTML = (src) => `<img src="/static/${src}" class="marquee-img" alt="Work">`;
 
-    // 1. Создаем список картинок из массива
-    const imagesHTML = HERO_IMAGES.map(img => createImgHTML(img)).join('');
-
-    // 2. Рассчитываем количество повторений
-    // Для мобильных нужно больше копий, чтобы лента была длинной
-    // Увеличили базовое число повторений до 6 для надежности
-    const repeatCount = 6; 
+    // 1. Формируем базовый набор картинок
+    const baseImages = HERO_IMAGES.map(img => createImgHTML(img)).join('');
     
-    let content = '';
-    for(let i=0; i < repeatCount; i++) {
-        content += imagesHTML;
+    // 2. Создаем "длинную колбасу" для заполнения экрана
+    // Повторяем базовый набор 4 раза, чтобы точно хватило на ширину любого телефона
+    let fillerContent = '';
+    for(let i=0; i < 4; i++) {
+        fillerContent += baseImages;
     }
-    
-    track.innerHTML = content;
+
+    // 3. !!! ГЛАВНЫЙ СЕКРЕТ БЕСШОВНОСТИ !!!
+    // Мы дублируем эту "длинную колбасу" ровно 2 раза.
+    // Анимация CSS сдвигает ленту на -50%. 
+    // Когда мы доходим до 50%, мы визуально оказываемся в точке, идентичной началу (0%).
+    track.innerHTML = fillerContent + fillerContent;
 }
 
 // Observer'ы
