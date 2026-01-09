@@ -410,7 +410,7 @@ body {
     bottom: 50px; /* Небольшая анимация вверх при появлении */
 }
 
-/* --- MOBILE ADAPTATION --- */
+/* --- MOBILE ADAPTATION (Вставьте это в конец style.css) --- */
 @media (max-width: 900px) {
     :root { --top-offset: 80px; } 
     
@@ -424,62 +424,110 @@ body {
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* --- ОБЩИЙ КОНТЕЙНЕР --- */
-    .content-wrapper {
-        flex-direction: column;
-        justify-content: center; /* Центрирует товары */
-        padding: 0 20px;
-        gap: 10px; /* Уменьшили общий зазор */
-        text-align: center;
-        height: 100%; 
+    /* === ИСПРАВЛЕНИЕ ГЛАВНОГО ЭКРАНА (HERO) === */
+    .hero-section {
+        height: 100dvh; /* Высота с учетом мобильных браузеров */
+        min-height: 500px;
+        padding: 0;
+        align-items: flex-start;
+        overflow: hidden;
     }
 
     .hero-wrapper {
+        flex-direction: column; /* Элементы друг под другом */
+        justify-content: flex-start;
+        /* Отступ сверху (под шапку) */
+        padding-top: 120px; 
+        /* Отступ снизу (чтобы кнопка не прилипала к краю) */
+        padding-bottom: 30px; 
+        gap: 0; 
+        text-align: center;
+        height: 100%; 
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* 1. БЛОК С ФОТО (СВЕРХУ) */
+    .hero-marquee-box { 
+        order: -1; /* Ставим визуально первым */
+        flex: 0 0 32vh; /* Занимает ровно 32% высоты экрана */
+        width: 100vw; /* На всю ширину */
+        margin-left: -20px; /* Компенсация отступов */
+        margin-right: -20px;
+        margin-bottom: 15px;
+        
+        /* ЛЕЧИМ МОРГАНИЕ И ИСЧЕЗНОВЕНИЕ: */
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+    
+    .marquee-img {
+        height: 100%; /* Растягиваем на всю высоту блока */
+        width: auto;
+        object-fit: cover;
+    }
+
+    /* 2. БЛОК С ТЕКСТОМ (СНИЗУ) */
+    .hero-text {
+        width: 100%;
+        flex: 1; /* Занимает ВСЁ оставшееся место */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Текст вверху, кнопка внизу */
+        align-items: center;
+        
+        /* ЛЕЧИМ ИСЧЕЗНОВЕНИЕ ТЕКСТА: */
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+        padding-bottom: 10px;
+    }
+
+    /* Настройки текста, чтобы влезал */
+    .hero-text h1 { 
+        font-size: 2.2rem; 
+        margin: 0 0 10px 0; 
+        line-height: 1.1; 
+    }
+    .subtitle { 
+        margin: 0 0 10px 0; 
+        font-size: 0.8rem; 
+    }
+    .separator { 
+        margin: 0 0 10px 0; 
+        width: 30px; 
+    }
+    .bio { 
+        font-size: 0.95rem; 
+        line-height: 1.3; 
+        margin: 0;
+    }
+    
+    /* Кнопка "Смотреть" */
+    .scroll-hint { 
+        margin-top: auto; /* Прижимаем к самому низу блока */
+        transform: scale(0.9);
+    }
+
+    /* === СТАРЫЕ НАСТРОЙКИ КАРТОЧЕК (НЕ ТРОГАЕМ ИХ) === */
+    /* Этот код взят из вашей оригинальной версии, чтобы товары остались красивыми */
+    
+    .content-wrapper:not(.hero-wrapper) {
         flex-direction: column;
         justify-content: center;
-        padding-top: 100px;
-        gap: 30px;
+        padding: 0 20px;
+        gap: 10px;
+        text-align: center;
+        height: 100%; 
     }
     
     .hero-image-box { 
         margin-bottom: 5px; 
-        order: -1; /* Картинка сверху */
-        flex: 0 0 auto; /* Не сжимать и не растягивать блок фото */
-    }
-    
-    .hero-text {
-        width: 100%;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .hero-text h1 { font-size: 2.5rem; }
-
-    .hero-marquee-box { 
-        margin-bottom: 5px; 
-        order: -1; /* Картинка сверху */
+        order: -1; 
         flex: 0 0 auto; 
-        width: 100vw; /* На всю ширину */
-        margin-left: -20px;
-        margin-right: -20px;
-    }
-    
-    .marquee-img {
-        height: 250px; /* На телефоне картинки еще меньше */
     }
 
-    .subtitle { margin-bottom: 10px; font-size: 0.85rem; margin-top: 0; }
-    .separator { margin-bottom: 10px; width: 40px; } /* Чуть меньше отступ */
-    .bio { font-size: 0.95rem; margin-bottom: 5px; line-height: 1.4; }
-    
-    /* Самое важное: поднимаем кнопку "Смотреть" */
-    .scroll-hint { 
-        margin-top: 15px; /* БЫЛО 50px -> СТАЛО 15px */
-    }
-
-    /* --- КАРТОЧКА ТОВАРА (оставляем как было, там всё хорошо) --- */
     .art-left-col {
         flex: 0 0 auto; 
         height: auto; 
