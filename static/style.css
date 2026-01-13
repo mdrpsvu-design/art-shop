@@ -410,10 +410,13 @@ body {
     bottom: 50px; /* Небольшая анимация вверх при появлении */
 }
 
-/* --- МОБИЛЬНАЯ ВЕРСИЯ (Вставьте в конец style.css) --- */
+/* === МОБИЛЬНАЯ ВЕРСИЯ === */
 @media (max-width: 900px) {
-    :root { --top-offset: 80px; } 
-    
+    :root { 
+        --top-offset: 80px; 
+    } 
+
+    /* Настройки шапки для мобильных */
     .top-bar, .category-nav { width: 100%; }
     .logo { font-size: 1.4rem; letter-spacing: 1px; }
     .logo-full { display: none; }
@@ -421,125 +424,162 @@ body {
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* === ГЛАВНЫЙ ЭКРАН === */
+    /* === ГЛАВНЫЙ ЭКРАН (HERO) === */
     .hero-section {
-        height: 100dvh; 
+        height: 100dvh; /* Высота ровно с экран телефона */
+        min-height: 550px; /* Чтобы на совсем маленьких не сплющило */
         padding: 0;
-        align-items: flex-start;
         overflow: hidden;
+        background: #fff;
     }
 
     .hero-wrapper {
-        flex-direction: column;
-        justify-content: flex-start;
-        padding-top: 120px;
-        padding-bottom: 20px;
-        gap: 0;
-        text-align: center;
+        display: flex;
+        flex-direction: column; /* Вертикальное расположение */
         width: 100%;
         height: 100%;
-        box-sizing: border-box;
+        padding: 0;
+        gap: 0;
+        margin: 0;
+        max-width: 100%;
     }
     
-    /* 1. БЛОК С ФОТОГРАФИЯМИ */
-    .hero-marquee-box { 
-        order: -1; 
-        /* Жесткая высота блока */
-        flex: 0 0 35vh !important; 
-        height: 35vh !important; 
-        min-height: 200px; /* Чтобы совсем не сплющило на старых айфонах */
+    /* 1. БЛОК С ФОТОГРАФИЕЙ */
+    .hero-marquee-box {
+        order: -1; /* Ставим фото наверх */
+        flex: 1;   /* Занимает всё свободное пространство */
+        width: 100%;
+        margin: 0 !important;
+        height: auto !important;
         
-        width: 100vw; 
-        margin-left: -20px; 
-        margin-right: -20px;
-        margin-bottom: 15px;
+        /* ВАЖНО: Ставим статичную картинку фоном */
+        /* Убедись, что mom.jpg лежит в папке static или поменяй имя файла */
+        background-image: url('/static/mom.jpg'); 
+        background-size: cover;
+        background-position: center top;
         
-        /* ВАЖНО: Убираем маску (градиент по краям), так как она может скрывать всё */
+        /* Скрываем всё лишнее от слайдера */
         mask-image: none !important;
         -webkit-mask-image: none !important;
-        
-        /* Принудительный показ */
         opacity: 1 !important;
-        visibility: visible !important;
         transform: none !important;
-        background: transparent; /* На случай если был фон */
+        min-width: 0;
     }
 
-    /* !!! ВОТ РЕШЕНИЕ ПРОБЛЕМЫ ИСЧЕЗНОВЕНИЯ !!! */
-    /* Внутреннее окно должно растянуться на высоту родителя */
-    .marquee-window {
-        height: 100% !important;
-        width: 100%;
-        overflow: hidden;
-    }
-
-    /* Трек с картинками тоже должен быть во всю высоту */
-    .marquee-track {
-        height: 100% !important;
-        display: flex;
-        align-items: center; /* Центрируем фото по вертикали */
-        animation: marquee-scroll 25s linear infinite !important;
-    }
-
-    .marquee-img {
-        height: 100% !important; /* Картинка занимает всю высоту блока */
-        width: auto; /* Ширина авто (сохраняем пропорции) */
-        object-fit: cover;
-        box-shadow: none; /* Убираем лишние тени */
-    }
+    /* Скрываем бегущую ленту, оставляем только фон блока */
+    .marquee-window { display: none; }
 
     /* 2. БЛОК С ТЕКСТОМ */
     .hero-text {
+        position: relative;
+        flex: 0 0 auto; /* Высота по содержимому */
         width: 100%;
-        flex: 1; 
+        
+        /* Магия дизайна: */
+        background: var(--bg-color); /* Цвет фона сайта */
+        padding: 30px 25px 40px 25px; /* Отступы внутри */
+        border-radius: 30px 30px 0 0; /* Закругляем углы сверху */
+        margin-top: -30px; /* Натягиваем текст на фото */
+        z-index: 10;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.1); /* Тень для объема */
+        box-sizing: border-box;
+        
+        /* Сброс анимаций появления, чтобы текст был виден сразу */
+        opacity: 1 !important;
+        transform: none !important;
+        text-align: center;
         display: flex;
         flex-direction: column;
-        justify-content: space-between; 
         align-items: center;
-        
-        opacity: 1 !important;
-        visibility: visible !important;
-        transform: none !important;
-        z-index: 10; /* Поднимаем текст над всем остальным */
     }
 
     .hero-text h1 { 
-        font-size: 2.2rem; 
+        font-size: 2.4rem; 
         margin: 0 0 10px 0; 
         line-height: 1.1; 
+        color: #222;
     }
-    .subtitle { margin: 0 0 10px 0; font-size: 0.8rem; }
-    .separator { margin: 0 0 10px 0; width: 30px; }
-    .bio { font-size: 0.95rem; margin: 0; }
     
+    .subtitle { 
+        margin: 0 0 15px 0; 
+        font-size: 0.75rem; 
+        opacity: 0.7; 
+    }
+    
+    .separator { 
+        margin: 0 0 15px 0; 
+        width: 40px; 
+        height: 2px;
+        background: var(--accent);
+    }
+    
+    .bio { 
+        font-size: 1rem; 
+        margin: 0 0 20px 0; 
+        line-height: 1.5;
+        max-width: 300px;
+    }
+    
+    /* Кнопка "Смотреть" */
     .scroll-hint { 
-        margin-top: auto; 
+        margin-top: 0; 
         transform: scale(0.9);
+        width: auto;
     }
 
-    /* === ОСТАЛЬНОЕ (КАРТОЧКИ) === */
+    /* === ОСТАЛЬНЫЕ БЛОКИ (КАРТОЧКИ ТОВАРОВ) === */
+    .slide-section {
+        height: auto; /* Разрешаем скроллить контент карточки */
+        min-height: 100dvh;
+        padding-top: 100px; /* Отступ под шапку */
+        padding-bottom: 50px;
+    }
+
     .content-wrapper:not(.hero-wrapper) {
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         padding: 0 20px;
-        gap: 10px;
+        gap: 20px;
         text-align: center;
-        height: 100%; 
+        height: auto;
     }
-    .hero-image-box { margin-bottom: 5px; order: -1; flex: 0 0 auto; }
-    .art-left-col { flex: 0 0 auto; height: auto; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
-    .art-right-col { flex: 0 0 auto; justify-content: flex-start; transform: none; opacity: 1; width: 100%; }
-    .art-img-container { padding: 0; box-shadow: none; background: transparent; display: flex; align-items: center; justify-content: center; }
-    .art-img { max-height: 45vh; max-width: 100%; width: auto; }
-    .art-title { font-size: 1.6rem; margin-bottom: 5px; line-height: 1.2; }
-    .art-price { font-size: 1.3rem; margin-bottom: 15px; }
-    .art-cat { margin-bottom: 5px; font-size: 0.7rem; }
-    .btn-group { width: 100%; gap: 10px; margin-top: 5px; }
-    .action-btn { flex: 1; width: auto; min-width: 0; padding: 12px 0; font-size: 0.75rem; }
-    .nav-arrow { width: 35px; height: 35px; background: rgba(255,255,255,0.8); }
-    .prev-arrow { left: 0; }
-    .next-arrow { right: 0; }
-    .modal-box { margin: 10vh auto; width: 90%; padding: 25px; max-height: 80vh; overflow-y: auto; }
+
+    .art-left-col { 
+        flex: 0 0 auto; 
+        width: 100%; 
+        margin-bottom: 10px; 
+    }
+    
+    .art-right-col { 
+        flex: 0 0 auto; 
+        opacity: 1 !important; 
+        transform: none !important; 
+        width: 100%; 
+        align-items: center; /* Центрируем тексты карточек */
+    }
+
+    .art-img-container { 
+        padding: 10px; 
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        border-radius: 8px;
+    }
+    
+    .art-img { 
+        max-height: 40vh; /* Ограничиваем высоту фото товара */
+        width: auto;
+        max-width: 100%;
+    }
+
+    .art-title { font-size: 1.8rem; margin-bottom: 5px; }
+    .art-price { font-size: 1.4rem; margin-bottom: 20px; }
+    .btn-group { width: 100%; justify-content: center; }
+    
+    .modal-box { 
+        width: 90%; 
+        margin: 15vh auto; 
+        padding: 30px 20px;
+    }
 }
 
 /* --- CUSTOM SCROLLBAR --- */
