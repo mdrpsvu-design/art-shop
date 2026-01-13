@@ -410,9 +410,11 @@ body {
     bottom: 50px; /* Небольшая анимация вверх при появлении */
 }
 
-/* === МОБИЛЬНАЯ ВЕРСИЯ (РЕЗИНОВАЯ) === */
+
 @media (max-width: 900px) {
-    :root { --top-offset: 80px; } 
+    :root { 
+        --top-offset: 70px; /* Высота шапки */
+    } 
 
     /* Базовые настройки */
     .top-bar, .category-nav { width: 100%; }
@@ -422,39 +424,45 @@ body {
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* === ГЛАВНЫЙ КОНТЕЙНЕР === */
+    /* === ГЛАВНЫЙ ЭКРАН === */
     .hero-section {
-        /* dvh = Dynamic Viewport Height (учитывает адресную строку браузера) */
+        /* Высота ровно 100% видимой области экрана */
         height: 100dvh; 
         padding: 0;
+        margin: 0;
         overflow: hidden;
         background: #fff;
         
-        /* ВКЛЮЧАЕМ FLEX-КОЛОНКУ */
+        /* Включаем Flexbox */
         display: flex;
-        flex-direction: column; 
+        flex-direction: column;
     }
 
+    /* Обертка становится прозрачной для Flexbox */
     .hero-wrapper {
-        display: contents; /* Обертка исчезает, элементы становятся детьми hero-section */
+        display: contents; 
     }
     
-    /* 1. КАРТИНКА (ЗАНИМАЕТ ВСЁ СВОБОДНОЕ МЕСТО) */
+    /* 1. КАРТИНКА (ТЕПЕРЬ СВЕРХУ) */
     .hero-marquee-box {
-        /* Flex: 1 означает "растянись на всё доступное пространство" */
+        /* order: -1 заставляет этот блок встать ПЕРЕД текстом */
+        order: -1; 
+        
+        /* flex: 1 заставляет картинку растянуться на ВСЁ свободное место */
         flex: 1; 
+        
         width: 100%;
         margin: 0 !important;
         
-        /* Если картинка не найдена, будет серый фон (чтобы не было белой дыры) */
-        background-color: #e0e0e0; 
+        /* Если картинка не грузится, будет серый фон */
+        background-color: #ddd; 
         
-        /* ПУТЬ К КАРТИНКЕ */
+        /* Ваша картинка */
         background-image: url('/static/mom.jpg'); 
         background-size: cover;
-        background-position: center;
+        background-position: center top; /* Фокус на верхней части фото */
         
-        /* Сброс старых стилей */
+        /* Сброс лишнего */
         opacity: 1 !important;
         visibility: visible !important;
         mask-image: none !important;
@@ -462,52 +470,72 @@ body {
         transform: none !important;
         position: relative;
     }
+    
+    /* Добавляем затемнение снизу картинки, чтобы текст лучше читался на стыке */
+    .hero-marquee-box::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+        background: linear-gradient(to top, rgba(0,0,0,0.05), transparent);
+    }
 
     .marquee-window { display: none; }
 
-    /* 2. ТЕКСТ (ПРИБИТ К НИЗУ) */
+    /* 2. ТЕКСТ (ТЕПЕРЬ СНИЗУ) */
     .hero-text {
-        /* Flex: 0 0 auto означает "не растягивайся, будь высотой по тексту" */
+        /* order: 0 (по умолчанию) оставляет текст ПОСЛЕ картинки */
+        order: 0;
+        
+        /* flex: 0 0 auto -> Высота зависит только от количества текста */
         flex: 0 0 auto;
         width: 100%;
         
         position: relative;
         z-index: 10;
         
-        /* Белая карточка */
         background: var(--bg-color);
-        padding: 30px 20px 40px 20px;
+        /* Отступы: сверху 30, по бокам 20, снизу 40 */
+        padding: 30px 20px 40px 20px; 
         box-sizing: border-box;
         text-align: center;
         
-        /* Эффект наезда на картинку */
-        margin-top: -30px; 
-        border-radius: 30px 30px 0 0;
+        /* Красивый "наезд" на картинку с закруглением */
+        margin-top: -25px; 
+        border-radius: 25px 25px 0 0;
         box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
         
-        /* Сброс анимации */
         opacity: 1 !important;
         transform: none !important;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: flex-end; /* Прижимает содержимое */
     }
 
     .hero-text h1 { 
-        font-size: 2.2rem; /* Чуть меньше для маленьких экранов */
+        font-size: 2rem; 
         margin: 0 0 10px 0; 
         line-height: 1.1; 
         color: #222;
     }
     
-    .subtitle { margin: 0 0 15px 0; font-size: 0.75rem; opacity: 0.8; }
+    .subtitle { margin: 0 0 15px 0; font-size: 0.75rem; opacity: 0.8; letter-spacing: 1px; }
     .separator { margin: 0 0 15px 0; width: 40px; height: 2px; background: var(--accent); }
-    .bio { font-size: 0.95rem; margin: 0 0 20px 0; line-height: 1.5; max-width: 320px; }
+    .bio { display: none; } /* СКРЫВАЕМ длинное описание на телефоне для компактности */
     
-    .scroll-hint { margin-top: 0; transform: scale(0.9); width: auto; }
+    /* Если хотите оставить описание, удалите строку .bio { display: none; } */
+    
+    .scroll-hint { 
+        margin-top: 10px; 
+        transform: scale(0.9); 
+        width: auto;
+    }
 
-    /* === ОСТАЛЬНОЕ === */
-    .slide-section { height: auto; min-height: 100dvh; padding-top: 100px; padding-bottom: 50px; }
+    /* === ОСТАЛЬНЫЕ БЛОКИ === */
+    .slide-section { height: auto; min-height: 100dvh; padding-top: 80px; padding-bottom: 50px; }
     .content-wrapper:not(.hero-wrapper) { flex-direction: column; padding: 0 20px; gap: 20px; height: auto; }
     .art-left-col { width: 100%; margin-bottom: 10px; }
     .art-right-col { width: 100%; opacity: 1 !important; transform: none !important; align-items: center; }
