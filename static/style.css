@@ -218,17 +218,16 @@ body {
 /* Сама лента с картинками */
 .marquee-track {
     display: flex;
-    align-items: center; /* Центрируем картинки по вертикали */
-    gap: 60px; /* Увеличили отступ, чтобы "герой" выделялся */
+    align-items: center;
+    gap: 60px; 
     width: max-content;
     
-    /* УБИРАЕМ animation: marquee-scroll ... */
-    /* ДОБАВЛЯЕМ transition для плавного сдвига JS-ом */
+    /* УДАЛИТЕ ЭТУ СТРОКУ: padding-left: 50%; */
+    /* Вместо нее можно поставить небольшой отступ, если хотите, но лучше 0 */
+    padding-left: 0; 
+
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
-    
-    /* Сдвигаем трек, чтобы первый элемент был примерно по центру (подгоним JS-ом) */
-    padding-left: 50%; 
 }
 
 /* Картинки */

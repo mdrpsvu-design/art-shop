@@ -14,21 +14,20 @@ const HERO_IMAGES = [
     "mom2.jpg"
 ];
 
+// Глобальные переменные для слайдера
 let heroSliderInterval;
-let heroCurrentIndex = 0;
+// Начинаем не с 0, а с запасом, чтобы слева уже были картинки
+let heroCurrentIndex = 4; 
 
 function initHeroSlideshow() {
     const track = document.getElementById('hero-marquee-track');
-    if (!track) return;
+    const windowBox = document.querySelector('.marquee-window'); // Контейнер (правая часть)
+    if (!track || !windowBox) return;
 
-    // 1. Подготовка данных
-    // Чтобы слайдер был "бесконечным", повторяем массив картинок много раз.
-    // (Простой и надежный способ без сложной математики перестановки DOM-элементов)
+    // 1. Генерируем длинную ленту
     let slidesHtml = '';
-    // Повторяем набор 20 раз (этого хватит надолго, потом можно сбросить, но пользователь уже уйдет вниз)
-    const loops = 20; 
-    
-    for (let i = 0; i < loops; i++) {
+    // Повторяем набор 20 раз для бесконечности
+    for (let i = 0; i < 20; i++) {
         HERO_IMAGES.forEach(src => {
             slidesHtml += `<img src="/static/${src}" class="marquee-img" alt="Work">`;
         });
@@ -37,50 +36,52 @@ function initHeroSlideshow() {
 
     const allImages = track.querySelectorAll('.marquee-img');
     
-    // 2. Функция центрирования и зума
+    // 2. Функция обновления позиции
     const updateSlider = () => {
-        if (heroCurrentIndex >= allImages.length) {
-            // Если дошли до конца (вряд ли, но вдруг), сбрасываем плавно или жестко
-            heroCurrentIndex = 0; 
-            track.style.transition = 'none'; // Отключаем анимацию для прыжка
+        // Если вдруг дошли до конца ленты — сбрасываем в начало (редкий кейс)
+        if (heroCurrentIndex >= allImages.length - 2) {
+            heroCurrentIndex = 4;
+            track.style.transition = 'none';
         } else {
             track.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         }
 
-        // Снимаем активный класс со всех
+        // Управление классами
         allImages.forEach(img => img.classList.remove('active'));
-
-        // Берем текущую картинку
         const currentImg = allImages[heroCurrentIndex];
         currentImg.classList.add('active');
 
         // --- МАТЕМАТИКА ЦЕНТРИРОВАНИЯ ---
-        // Нам нужно сдвинуть track так, чтобы центр currentImg совпал с центром экрана (или родителя)
-        // Формула: Сдвиг = (ШиринаКартинки / 2) + (СуммаШиринВсехПредыдущихКартинокСОтступами)
         
-        // Поскольку у нас картинки могут быть разной ширины (auto), лучше считать через offsetLeft
-        const imgCenter = currentImg.offsetLeft + (currentImg.offsetWidth / 2);
+        // 1. Ширина видимой области (правой части экрана)
+        const containerWidth = windowBox.offsetWidth;
         
-        // Мы хотим, чтобы этот imgCenter был в точке 0 (по центру экрана, так как мы используем padding-left: 50% в CSS)
-        // Но так как transform сдвигает влево, значение должно быть отрицательным.
-        
-        const moveX = -(imgCenter);
-        
-        // Применяем сдвиг
+        // 2. Центр видимой области
+        const containerCenter = containerWidth / 2;
+
+        // 3. Координата центра картинки относительно начала ленты
+        // offsetLeft дает отступ от левого края ленты
+        const imgCenterRelativeToTrack = currentImg.offsetLeft + (currentImg.offsetWidth / 2);
+
+        // 4. Вычисляем, насколько нужно сдвинуть ленту влево (поэтому минус),
+        // чтобы точки containerCenter и imgCenterRelativeToTrack совпали.
+        const moveX = containerCenter - imgCenterRelativeToTrack;
+
         track.style.transform = `translateX(${moveX}px)`;
 
-        // Готовим следующий шаг
+        // Готовим индекс для следующего такта
         heroCurrentIndex++;
     };
 
-    // 3. Запуск цикла
-    // Сразу показываем первую
-    // Небольшая задержка, чтобы картинки успели прогрузиться и получить ширину
+    // 3. Запуск
+    // Ждем чуть дольше (300мс), чтобы браузер точно отрисовал ширину картинок и контейнера
     setTimeout(() => {
+        // Принудительно отключаем анимацию для первого кадра, чтобы картинка "прыгнула" в центр мгновенно при загрузке
+        track.style.transition = 'none'; 
         updateSlider();
-    }, 100);
+    }, 300);
 
-    // Интервал: 3 секунды пауза + 0.8 секунд анимация = ~3.8 - 4 секунды
+    // Запускаем интервал
     if (heroSliderInterval) clearInterval(heroSliderInterval);
     heroSliderInterval = setInterval(updateSlider, 3500);
 }
