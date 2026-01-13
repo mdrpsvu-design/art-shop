@@ -443,7 +443,7 @@ body {
 
 @media (max-width: 900px) {
     :root { 
-        --top-offset: 70px; /* Высота шапки */
+        --top-offset: 70px; 
     } 
 
     /* Базовые настройки */
@@ -456,43 +456,29 @@ body {
 
     /* === ГЛАВНЫЙ ЭКРАН === */
     .hero-section {
-        /* Высота ровно 100% видимой области экрана */
         height: 100dvh; 
         padding: 0;
         margin: 0;
         overflow: hidden;
         background: #fff;
-        
-        /* Включаем Flexbox */
         display: flex;
         flex-direction: column;
     }
 
-    /* Обертка становится прозрачной для Flexbox */
     .hero-wrapper {
         display: contents; 
     }
     
-    /* 1. КАРТИНКА (ТЕПЕРЬ СВЕРХУ) */
+    /* 1. КАРТИНКА */
     .hero-marquee-box {
-        /* order: -1 заставляет этот блок встать ПЕРЕД текстом */
         order: -1; 
-        
-        /* flex: 1 заставляет картинку растянуться на ВСЁ свободное место */
-        flex: 1; 
-        
+        flex: 1; /* Картинка занимает всё свободное место */
         width: 100%;
         margin: 0 !important;
-        
-        /* Если картинка не грузится, будет серый фон */
         background-color: #ddd; 
-        
-        /* Ваша картинка */
         background-image: url('/static/mom.jpg'); 
         background-size: cover;
-        background-position: center top; /* Фокус на верхней части фото */
-        
-        /* Сброс лишнего */
+        background-position: center top; 
         opacity: 1 !important;
         visibility: visible !important;
         mask-image: none !important;
@@ -501,40 +487,37 @@ body {
         position: relative;
     }
     
-    /* Добавляем затемнение снизу картинки, чтобы текст лучше читался на стыке */
     .hero-marquee-box::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 50px;
-        background: linear-gradient(to top, rgba(0,0,0,0.05), transparent);
+        height: 80px; /* Чуть увеличили градиент для плавного перехода */
+        background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
     }
 
     .marquee-window { display: none; }
 
-    /* 2. ТЕКСТ (ТЕПЕРЬ СНИЗУ) */
+    /* 2. ТЕКСТ (ИЗМЕНЕНИЯ ЗДЕСЬ) */
     .hero-text {
-        /* order: 0 (по умолчанию) оставляет текст ПОСЛЕ картинки */
         order: 0;
-        
-        /* flex: 0 0 auto -> Высота зависит только от количества текста */
         flex: 0 0 auto;
         width: 100%;
-        
         position: relative;
         z-index: 10;
-        
         background: var(--bg-color);
-        /* Отступы: сверху 30, по бокам 20, снизу 40 */
-        padding: 30px 20px 40px 20px; 
+        
+        /* Изменены отступы:
+           сверху 45px (чтобы блок был повыше), 
+           снизу 15px (чтобы прижать текст к самому низу экрана) 
+        */
+        padding: 45px 20px 15px 20px; 
+        
         box-sizing: border-box;
         text-align: center;
-        
-        /* Красивый "наезд" на картинку с закруглением */
-        margin-top: -25px; 
-        border-radius: 25px 25px 0 0;
+        margin-top: -30px; /* Чуть сильнее заезжаем на картинку */
+        border-radius: 30px 30px 0 0; /* Закругление чуть больше */
         box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
         
         opacity: 1 !important;
@@ -542,29 +525,35 @@ body {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-end; /* Прижимает содержимое */
+        justify-content: flex-end; 
     }
 
+    /* УВЕЛИЧЕННЫЙ ШРИФТ */
     .hero-text h1 { 
-        font-size: 2rem; 
+        font-size: 2.6rem; /* Было 2rem, стало крупнее */
         margin: 0 0 10px 0; 
-        line-height: 1.1; 
+        line-height: 1; /* Плотный интерлиньяж */
         color: #222;
     }
     
-    .subtitle { margin: 0 0 15px 0; font-size: 0.75rem; opacity: 0.8; letter-spacing: 1px; }
-    .separator { margin: 0 0 15px 0; width: 40px; height: 2px; background: var(--accent); }
-    .bio { display: none; } /* СКРЫВАЕМ длинное описание на телефоне для компактности */
+    .subtitle { 
+        margin: 0 0 15px 0; 
+        font-size: 0.9rem; /* Было 0.75rem, читается лучше */
+        opacity: 0.8; 
+        letter-spacing: 1.5px; 
+    }
     
-    /* Если хотите оставить описание, удалите строку .bio { display: none; } */
+    .separator { margin: 0 0 15px 0; width: 50px; height: 2px; background: var(--accent); }
+    .bio { display: none; } 
     
     .scroll-hint { 
-        margin-top: 10px; 
-        transform: scale(0.9); 
+        margin-top: 5px; /* Уменьшили отступ до кнопки */
+        margin-bottom: 5px; /* Небольшой отступ от самого низа экрана */
+        transform: scale(1); /* Вернули нормальный размер (было 0.9) */
         width: auto;
     }
 
-    /* === ОСТАЛЬНЫЕ БЛОКИ === */
+    /* === ОСТАЛЬНЫЕ БЛОКИ (Без изменений) === */
     .slide-section { height: auto; min-height: 100dvh; padding-top: 80px; padding-bottom: 50px; }
     .content-wrapper:not(.hero-wrapper) { flex-direction: column; padding: 0 20px; gap: 20px; height: auto; }
     .art-left-col { width: 100%; margin-bottom: 10px; }
