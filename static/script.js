@@ -14,24 +14,75 @@ const HERO_IMAGES = [
     "mom2.jpg"
 ];
 
+let heroSliderInterval;
+let heroCurrentIndex = 0;
+
 function initHeroSlideshow() {
     const track = document.getElementById('hero-marquee-track');
     if (!track) return;
 
-    // Генерируем HTML одной картинки
-    // ВАЖНО: Убедитесь, что картинки mom.jpg, mom1.jpg и т.д. существуют в папке static
-    const createImgHTML = (src) => `<img src="/static/${src}" class="marquee-img" alt="Work">`;
-
-    const baseImages = HERO_IMAGES.map(img => createImgHTML(img)).join('');
+    // 1. Подготовка данных
+    // Чтобы слайдер был "бесконечным", повторяем массив картинок много раз.
+    // (Простой и надежный способ без сложной математики перестановки DOM-элементов)
+    let slidesHtml = '';
+    // Повторяем набор 20 раз (этого хватит надолго, потом можно сбросить, но пользователь уже уйдет вниз)
+    const loops = 20; 
     
-    // Создаем длинную ленту (повторяем 6 раз для надежности)
-    let longStrip = '';
-    for(let i=0; i < 6; i++) {
-        longStrip += baseImages;
+    for (let i = 0; i < loops; i++) {
+        HERO_IMAGES.forEach(src => {
+            slidesHtml += `<img src="/static/${src}" class="marquee-img" alt="Work">`;
+        });
     }
+    track.innerHTML = slidesHtml;
 
-    // Дублируем ленту для бесконечной прокрутки
-    track.innerHTML = longStrip + longStrip;
+    const allImages = track.querySelectorAll('.marquee-img');
+    
+    // 2. Функция центрирования и зума
+    const updateSlider = () => {
+        if (heroCurrentIndex >= allImages.length) {
+            // Если дошли до конца (вряд ли, но вдруг), сбрасываем плавно или жестко
+            heroCurrentIndex = 0; 
+            track.style.transition = 'none'; // Отключаем анимацию для прыжка
+        } else {
+            track.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+
+        // Снимаем активный класс со всех
+        allImages.forEach(img => img.classList.remove('active'));
+
+        // Берем текущую картинку
+        const currentImg = allImages[heroCurrentIndex];
+        currentImg.classList.add('active');
+
+        // --- МАТЕМАТИКА ЦЕНТРИРОВАНИЯ ---
+        // Нам нужно сдвинуть track так, чтобы центр currentImg совпал с центром экрана (или родителя)
+        // Формула: Сдвиг = (ШиринаКартинки / 2) + (СуммаШиринВсехПредыдущихКартинокСОтступами)
+        
+        // Поскольку у нас картинки могут быть разной ширины (auto), лучше считать через offsetLeft
+        const imgCenter = currentImg.offsetLeft + (currentImg.offsetWidth / 2);
+        
+        // Мы хотим, чтобы этот imgCenter был в точке 0 (по центру экрана, так как мы используем padding-left: 50% в CSS)
+        // Но так как transform сдвигает влево, значение должно быть отрицательным.
+        
+        const moveX = -(imgCenter);
+        
+        // Применяем сдвиг
+        track.style.transform = `translateX(${moveX}px)`;
+
+        // Готовим следующий шаг
+        heroCurrentIndex++;
+    };
+
+    // 3. Запуск цикла
+    // Сразу показываем первую
+    // Небольшая задержка, чтобы картинки успели прогрузиться и получить ширину
+    setTimeout(() => {
+        updateSlider();
+    }, 100);
+
+    // Интервал: 3 секунды пауза + 0.8 секунд анимация = ~3.8 - 4 секунды
+    if (heroSliderInterval) clearInterval(heroSliderInterval);
+    heroSliderInterval = setInterval(updateSlider, 3500);
 }
 
 // Observer'ы
