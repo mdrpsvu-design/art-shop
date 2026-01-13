@@ -410,13 +410,11 @@ body {
     bottom: 50px; /* Небольшая анимация вверх при появлении */
 }
 
-/* === МОБИЛЬНАЯ ВЕРСИЯ === */
+/* === МОБИЛЬНАЯ ВЕРСИЯ (РЕЗИНОВАЯ) === */
 @media (max-width: 900px) {
-    :root { 
-        --top-offset: 80px; 
-    } 
+    :root { --top-offset: 80px; } 
 
-    /* Настройки шапки для мобильных */
+    /* Базовые настройки */
     .top-bar, .category-nav { width: 100%; }
     .logo { font-size: 1.4rem; letter-spacing: 1px; }
     .logo-full { display: none; }
@@ -424,162 +422,101 @@ body {
     .contact-trigger { font-size: 0.8rem; }
     .search-box input { width: 80px; }
 
-    /* === ГЛАВНЫЙ ЭКРАН (HERO) === */
+    /* === ГЛАВНЫЙ КОНТЕЙНЕР === */
     .hero-section {
-        height: 100dvh; /* Высота ровно с экран телефона */
-        min-height: 550px; /* Чтобы на совсем маленьких не сплющило */
+        /* dvh = Dynamic Viewport Height (учитывает адресную строку браузера) */
+        height: 100dvh; 
         padding: 0;
         overflow: hidden;
         background: #fff;
+        
+        /* ВКЛЮЧАЕМ FLEX-КОЛОНКУ */
+        display: flex;
+        flex-direction: column; 
     }
 
     .hero-wrapper {
-        display: flex;
-        flex-direction: column; /* Вертикальное расположение */
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        gap: 0;
-        margin: 0;
-        max-width: 100%;
+        display: contents; /* Обертка исчезает, элементы становятся детьми hero-section */
     }
     
-    /* 1. БЛОК С ФОТОГРАФИЕЙ */
+    /* 1. КАРТИНКА (ЗАНИМАЕТ ВСЁ СВОБОДНОЕ МЕСТО) */
     .hero-marquee-box {
-        order: -1; /* Ставим фото наверх */
-        flex: 1;   /* Занимает всё свободное пространство */
+        /* Flex: 1 означает "растянись на всё доступное пространство" */
+        flex: 1; 
         width: 100%;
         margin: 0 !important;
-        height: auto !important;
         
-        /* ВАЖНО: Ставим статичную картинку фоном */
-        /* Убедись, что mom.jpg лежит в папке static или поменяй имя файла */
+        /* Если картинка не найдена, будет серый фон (чтобы не было белой дыры) */
+        background-color: #e0e0e0; 
+        
+        /* ПУТЬ К КАРТИНКЕ */
         background-image: url('/static/mom.jpg'); 
         background-size: cover;
-        background-position: center top;
+        background-position: center;
         
-        /* Скрываем всё лишнее от слайдера */
+        /* Сброс старых стилей */
+        opacity: 1 !important;
+        visibility: visible !important;
         mask-image: none !important;
         -webkit-mask-image: none !important;
-        opacity: 1 !important;
         transform: none !important;
-        min-width: 0;
+        position: relative;
     }
 
-    /* Скрываем бегущую ленту, оставляем только фон блока */
     .marquee-window { display: none; }
 
-    /* 2. БЛОК С ТЕКСТОМ */
+    /* 2. ТЕКСТ (ПРИБИТ К НИЗУ) */
     .hero-text {
-        position: relative;
-        flex: 0 0 auto; /* Высота по содержимому */
+        /* Flex: 0 0 auto означает "не растягивайся, будь высотой по тексту" */
+        flex: 0 0 auto;
         width: 100%;
         
-        /* Магия дизайна: */
-        background: var(--bg-color); /* Цвет фона сайта */
-        padding: 30px 25px 40px 25px; /* Отступы внутри */
-        border-radius: 30px 30px 0 0; /* Закругляем углы сверху */
-        margin-top: -30px; /* Натягиваем текст на фото */
+        position: relative;
         z-index: 10;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.1); /* Тень для объема */
-        box-sizing: border-box;
         
-        /* Сброс анимаций появления, чтобы текст был виден сразу */
+        /* Белая карточка */
+        background: var(--bg-color);
+        padding: 30px 20px 40px 20px;
+        box-sizing: border-box;
+        text-align: center;
+        
+        /* Эффект наезда на картинку */
+        margin-top: -30px; 
+        border-radius: 30px 30px 0 0;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        
+        /* Сброс анимации */
         opacity: 1 !important;
         transform: none !important;
-        text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
     .hero-text h1 { 
-        font-size: 2.4rem; 
+        font-size: 2.2rem; /* Чуть меньше для маленьких экранов */
         margin: 0 0 10px 0; 
         line-height: 1.1; 
         color: #222;
     }
     
-    .subtitle { 
-        margin: 0 0 15px 0; 
-        font-size: 0.75rem; 
-        opacity: 0.7; 
-    }
+    .subtitle { margin: 0 0 15px 0; font-size: 0.75rem; opacity: 0.8; }
+    .separator { margin: 0 0 15px 0; width: 40px; height: 2px; background: var(--accent); }
+    .bio { font-size: 0.95rem; margin: 0 0 20px 0; line-height: 1.5; max-width: 320px; }
     
-    .separator { 
-        margin: 0 0 15px 0; 
-        width: 40px; 
-        height: 2px;
-        background: var(--accent);
-    }
-    
-    .bio { 
-        font-size: 1rem; 
-        margin: 0 0 20px 0; 
-        line-height: 1.5;
-        max-width: 300px;
-    }
-    
-    /* Кнопка "Смотреть" */
-    .scroll-hint { 
-        margin-top: 0; 
-        transform: scale(0.9);
-        width: auto;
-    }
+    .scroll-hint { margin-top: 0; transform: scale(0.9); width: auto; }
 
-    /* === ОСТАЛЬНЫЕ БЛОКИ (КАРТОЧКИ ТОВАРОВ) === */
-    .slide-section {
-        height: auto; /* Разрешаем скроллить контент карточки */
-        min-height: 100dvh;
-        padding-top: 100px; /* Отступ под шапку */
-        padding-bottom: 50px;
-    }
-
-    .content-wrapper:not(.hero-wrapper) {
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 0 20px;
-        gap: 20px;
-        text-align: center;
-        height: auto;
-    }
-
-    .art-left-col { 
-        flex: 0 0 auto; 
-        width: 100%; 
-        margin-bottom: 10px; 
-    }
-    
-    .art-right-col { 
-        flex: 0 0 auto; 
-        opacity: 1 !important; 
-        transform: none !important; 
-        width: 100%; 
-        align-items: center; /* Центрируем тексты карточек */
-    }
-
-    .art-img-container { 
-        padding: 10px; 
-        background: #fff;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-        border-radius: 8px;
-    }
-    
-    .art-img { 
-        max-height: 40vh; /* Ограничиваем высоту фото товара */
-        width: auto;
-        max-width: 100%;
-    }
-
-    .art-title { font-size: 1.8rem; margin-bottom: 5px; }
-    .art-price { font-size: 1.4rem; margin-bottom: 20px; }
+    /* === ОСТАЛЬНОЕ === */
+    .slide-section { height: auto; min-height: 100dvh; padding-top: 100px; padding-bottom: 50px; }
+    .content-wrapper:not(.hero-wrapper) { flex-direction: column; padding: 0 20px; gap: 20px; height: auto; }
+    .art-left-col { width: 100%; margin-bottom: 10px; }
+    .art-right-col { width: 100%; opacity: 1 !important; transform: none !important; align-items: center; }
+    .art-img-container { padding: 10px; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-radius: 8px; }
+    .art-img { max-height: 45vh; width: auto; max-width: 100%; }
+    .art-title { font-size: 1.6rem; margin-bottom: 5px; }
+    .art-price { font-size: 1.3rem; margin-bottom: 20px; }
     .btn-group { width: 100%; justify-content: center; }
-    
-    .modal-box { 
-        width: 90%; 
-        margin: 15vh auto; 
-        padding: 30px 20px;
-    }
+    .modal-box { width: 90%; margin: 15vh auto; padding: 25px 20px; }
 }
 
 /* --- CUSTOM SCROLLBAR --- */
