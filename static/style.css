@@ -443,7 +443,7 @@ body {
 
 @media (max-width: 900px) {
     :root { 
-        --top-offset: 70px; 
+        --top-offset: 70px;
     } 
 
     /* Базовые настройки */
@@ -557,10 +557,18 @@ body {
     .slide-section { height: auto; min-height: 100dvh; padding-top: 80px; padding-bottom: 50px; }
     .content-wrapper:not(.hero-wrapper) { flex-direction: column; padding: 0 20px; gap: 20px; height: auto; }
     .art-left-col { width: 100%; margin-bottom: 10px; }
-    .art-right-col { width: 100%; opacity: 1 !important; transform: none !important; align-items: center; }
+    .art-right-col { 
+        width: 100%; 
+        opacity: 1 !important; 
+        transform: none !important; 
+        align-items: center;    /* Это центрирует кнопки и блоки */
+        text-align: center;     /* ДОБАВЬТЕ ЭТО: центрирует текст внутри заголовков */
+    }
     .art-img-container { padding: 10px; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-radius: 8px; }
     .art-img { max-height: 45vh; width: auto; max-width: 100%; }
-    .art-title { font-size: 1.6rem; margin-bottom: 5px; }
+    .art-title, .art-cat, .art-price {
+        width: 100%;
+    }
     .art-price { font-size: 1.3rem; margin-bottom: 20px; }
     .btn-group { width: 100%; justify-content: center; }
     .modal-box { width: 90%; margin: 15vh auto; padding: 25px 20px; }
