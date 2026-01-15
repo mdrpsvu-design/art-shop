@@ -553,7 +553,6 @@ body {
         width: auto;
     }
 
-    /* === ОСТАЛЬНЫЕ БЛОКИ (Без изменений) === */
     .slide-section { height: auto; min-height: 100dvh; padding-top: 80px; padding-bottom: 50px; }
     .content-wrapper:not(.hero-wrapper) { flex-direction: column; padding: 0 20px; gap: 20px; height: auto; }
     .art-left-col { width: 100%; margin-bottom: 10px; }
@@ -568,6 +567,11 @@ body {
     .art-img { max-height: 45vh; width: auto; max-width: 100%; }
     .art-title, .art-cat, .art-price {
         width: 100%;
+    }
+    .art-title {
+        font-size: 1.8rem; /* Уменьшаем размер (было 3rem) */
+        margin-bottom: 10px; 
+        line-height: 1.1;
     }
     .art-price { font-size: 1.3rem; margin-bottom: 20px; }
     .btn-group { width: 100%; justify-content: center; }
